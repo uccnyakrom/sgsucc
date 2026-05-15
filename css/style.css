@@ -606,3 +606,22 @@ tbody tr.dup-row:hover { background: #FEF3C7; }
   #page-content { padding: 16px; }
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* ================================================================
+   PASSWORD REQUIREMENT RULES (used in change-password modal)
+   ================================================================ */
+.pw-req {
+  font-size: 12px;
+  color: var(--gray-400);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: color 0.2s;
+}
+.pw-req.pw-req-met { color: var(--success); font-weight: 600; }
+.pw-dot {
+  font-size: 13px;
+  flex-shrink: 0;
+  width: 16px;
+  text-align: center;
+}
