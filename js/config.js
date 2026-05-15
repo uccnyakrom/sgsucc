@@ -8,8 +8,8 @@
 //    Supabase Dashboard → Your Project → Settings → API
 // ================================================================
 
-const SUPABASE_URL  = 'https://viflvvqqcgfjhbhnlpci.supabase.co';
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZpZmx2dnFxY2dmamhiaG5scGNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3OTY5NDIsImV4cCI6MjA5NDM3Mjk0Mn0.bM5kHNUgukQyNnqyo9fEtjkEyRO7ZaPlYQrutB8wWdk';
+const SUPABASE_URL  = 'https://YOUR-PROJECT-REF.supabase.co';
+const SUPABASE_ANON = 'YOUR-ANON-PUBLIC-KEY';
 
 // ----------------------------------------------------------------
 //  Do not edit below this line
