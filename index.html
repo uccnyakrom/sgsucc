@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <title>UCC Graduate Clearance Portal</title>
-  <meta name="description" content="University of Cape Coast — Graduate Clearance & Certificate Issuance Management Portal">
+  <meta name="description" content="University of Cape Coast — Graduate Clearance & Certificate Issuance Portal">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -12,16 +12,19 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
-    code{font-family:'Courier New',monospace;background:var(--gray-100);padding:2px 6px;border-radius:4px;font-size:12px}
-    #app{display:none}
-    .flex{display:flex}.flex-col{flex-direction:column}.h-full{height:100%}.overflow-hidden{overflow:hidden}
-    .pw-rule{font-size:12px;display:flex;align-items:center;gap:6px;color:var(--gray-400);transition:color 0.2s}
-    .pw-rule.pass{color:var(--success)}
+    code { font-family:'Courier New',monospace; background:var(--gray-100); padding:2px 6px; border-radius:4px; font-size:12px; }
+    #app { display:none; }
+    .flex { display:flex; }
+    .flex-col { flex-direction:column; }
+    .h-full { height:100%; }
+    .overflow-hidden { overflow:hidden; }
   </style>
 </head>
 <body>
 
-<!-- LOGIN -->
+<!-- ============================================================
+     LOGIN PAGE
+     ============================================================ -->
 <div id="login-page" style="display:flex">
   <div class="login-card">
     <div class="login-header">
@@ -35,17 +38,22 @@
       <form onsubmit="handleLogin(event)">
         <div class="form-group">
           <label for="login-email">Institutional Email</label>
-          <input type="email" id="login-email" class="form-control" placeholder="username@ucc.edu.gh" required autocomplete="email">
+          <input type="email" id="login-email" class="form-control"
+            placeholder="username@ucc.edu.gh" required autocomplete="email">
         </div>
         <div class="form-group">
           <label for="login-password">Password</label>
-          <input type="password" id="login-password" class="form-control" placeholder="Enter your password" required autocomplete="current-password">
+          <input type="password" id="login-password" class="form-control"
+            placeholder="Enter your password" required autocomplete="current-password">
         </div>
         <div id="login-error" class="login-error"></div>
-        <button type="submit" id="login-btn" class="btn-login">🔐 Sign In Securely</button>
+        <button type="submit" id="login-btn" class="btn-login">
+          🔐 Sign In Securely
+        </button>
       </form>
-      <div style="margin-top:16px;padding:13px;background:var(--gray-100);border-radius:10px;font-size:12px;color:var(--gray-600);text-align:center;line-height:1.7">
-        🔒 Authorised University staff only.<br>Contact your administrator if you need access or have forgotten your password.
+      <div style="margin-top:16px;padding:12px 14px;background:var(--gray-100);border-radius:10px;
+           font-size:12px;color:var(--gray-600);text-align:center">
+        🔒 Secure access for authorised University staff only.
       </div>
     </div>
   </div>
@@ -53,8 +61,16 @@
 </div>
 
 
-<!-- MAIN APP -->
+<!-- ============================================================
+     MAIN APP
+     ============================================================ -->
+
+<!-- Mobile overlay — tap to close sidebar -->
+<div id="sidebar-overlay" onclick="closeMobileSidebar()"></div>
+
 <div id="app" class="flex h-full overflow-hidden">
+
+  <!-- Sidebar -->
   <nav id="sidebar">
     <div class="sidebar-logo">
       <div class="sidebar-logo-icon">🎓</div>
@@ -72,31 +88,41 @@
           <div class="user-name" id="sidebar-name">Loading…</div>
           <div class="user-role" id="sidebar-role"></div>
         </div>
-        <button class="btn-logout" onclick="openChangePasswordModal()" title="Change my password" style="font-size:14px">🔑</button>
+        <button class="btn-logout" onclick="openChangePasswordModal(false)"
+          title="Change password" style="font-size:14px">🔑</button>
         <button class="btn-logout" onclick="handleLogout()" title="Sign out">⏏</button>
       </div>
     </div>
   </nav>
 
+  <!-- Main -->
   <div id="main" class="flex flex-col h-full overflow-hidden" style="flex:1">
+
+    <!-- Topbar -->
     <header id="topbar">
-      <div>
-        <div class="topbar-title" id="topbar-title">Dashboard</div>
-        <div class="topbar-sub">University of Cape Coast · School of Graduate Studies</div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <button id="mobile-menu-btn" onclick="toggleMobileSidebar()">☰</button>
+        <div>
+          <div class="topbar-title" id="topbar-title">Dashboard</div>
+          <div class="topbar-sub">University of Cape Coast · School of Graduate Studies</div>
+        </div>
       </div>
-      <div class="topbar-user" style="cursor:pointer" onclick="openChangePasswordModal()" title="Change my password">
+      <div class="topbar-user" style="cursor:pointer"
+        onclick="openChangePasswordModal(false)" title="Change password">
         <div class="topbar-avatar" id="topbar-avatar">?</div>
         <div>
           <div class="topbar-name" id="topbar-name">Loading…</div>
-          <div class="topbar-role" style="color:var(--gold);font-size:10px;font-weight:600">🔑 Change password</div>
+          <div style="font-size:10px;color:var(--gold);font-weight:600">🔑 Change password</div>
         </div>
       </div>
     </header>
+
     <main id="page-content"></main>
   </div>
 </div>
 
 
+<!-- Scripts -->
 <script src="js/config.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/router.js"></script>
@@ -106,6 +132,30 @@
 <script src="js/duplicates.js"></script>
 <script src="js/issuance.js"></script>
 <script src="js/reports.js"></script>
-<script>document.addEventListener('DOMContentLoaded', () => { initAuth(); });</script>
+
+<script>
+  // Mobile sidebar functions
+  function toggleMobileSidebar() {
+    const sb      = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    sb.classList.toggle('mobile-open');
+    overlay.classList.toggle('active');
+  }
+
+  function closeMobileSidebar() {
+    document.getElementById('sidebar').classList.remove('mobile-open');
+    document.getElementById('sidebar-overlay').classList.remove('active');
+  }
+
+  // Close sidebar when a nav item is clicked on mobile
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('.nav-item') && window.innerWidth <= 768) {
+      closeMobileSidebar();
+    }
+  });
+
+  document.addEventListener('DOMContentLoaded', () => { initAuth(); });
+</script>
+
 </body>
 </html>
