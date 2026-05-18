@@ -448,13 +448,22 @@ async function validateRows(batchName) {
   const indexes   = validRows.map(r => r.student_index_number);
 
   // Check existing index numbers in DB
+  // A duplicate is SAME index number in SAME batch only
+  // Same student in a different year/batch is allowed
   const { data: existing } = await db
     .from('students')
-    .select('student_index_number')
+    .select('student_index_number, graduation_batch')
     .in('student_index_number', indexes.length ? indexes : ['__none__']);
-  const existingSet = new Set((existing || []).map(s => s.student_index_number));
 
-  // Check already-issued
+  // Build a set of "index|batch" combinations that already exist
+  const existingSet = new Set(
+    (existing || []).map(s => s.student_index_number + '|' + batchName)
+  );
+  // Also flag pure index duplicates within same batch from the file itself
+  const existingIndexOnly = new Set((existing || []).map(s => s.student_index_number));
+
+  // Check already-issued (these should never get a second certificate
+  // regardless of batch or year)
   const { data: issued } = await db
     .from('students_full')
     .select('student_index_number')
@@ -462,7 +471,10 @@ async function validateRows(batchName) {
     .in('student_index_number', indexes.length ? indexes : ['__none__']);
   const issuedSet = new Set((issued || []).map(s => s.student_index_number));
 
-  const dups         = indexes.filter(idx => existingSet.has(idx));
+  // Flag as duplicate only if the index exists in the SAME batch name
+  const dups = validRows
+    .filter(r => existingIndexOnly.has(r.student_index_number))
+    .map(r => r.student_index_number);
   const alreadyIssued = indexes.filter(idx => issuedSet.has(idx));
   const valid        = validRows.filter(r =>
     !dups.includes(r.student_index_number) &&
@@ -484,7 +496,7 @@ async function importBatch() {
   if (btn) { btn.disabled = true; btn.innerHTML = '<span class="loader" style="width:14px;height:14px;border-width:2px;border-color:rgba(255,255,255,0.3);border-top-color:#fff"></span> Importing…'; }
 
   try {
-    // Create batch record
+    // 1. Create the batch record
     const { data: batch, error: bErr } = await db
       .from('uploaded_batches')
       .insert({
@@ -501,51 +513,66 @@ async function importBatch() {
       .single();
     if (bErr) throw bErr;
 
-    // Filter to valid rows only
-    const toInsert = parsedRows.filter(r =>
-      r.student_index_number &&
-      r.full_name &&
-      !v.dups.includes(r.student_index_number) &&
-      !v.alreadyIssued.includes(r.student_index_number) &&
-      !v.errors.find(e => parsedRows.indexOf(r) + 2 === e.row)
-    ).map(r => ({
-      student_index_number: r.student_index_number,
-      full_name:            r.full_name,
-      programme:            r.programme,
-      department:           r.department,
-      faculty:              r.faculty,
-      level:                r.level,
-      thesis_status:        r.thesis_status || 'Pending',
-      graduation_year:      r.graduation_year,
-      graduation_batch:     batchName,
-      email:                r.email   || null,
-      phone:                r.phone   || null,
-      uploaded_batch_id:    batch.id,
-      duplicate_flag:       false,
-    }));
+    // 2. Build only the valid rows to insert
+    //    NEVER delete or overwrite existing students - only ADD new ones
+    const toInsert = parsedRows
+      .filter((r, idx) =>
+        r.student_index_number &&
+        r.full_name &&
+        !v.dups.includes(r.student_index_number) &&
+        !v.alreadyIssued.includes(r.student_index_number) &&
+        !v.errors.find(e => e.row === idx + 2)
+      )
+      .map(r => ({
+        student_index_number: r.student_index_number,
+        full_name:            r.full_name,
+        programme:            r.programme,
+        department:           r.department,
+        faculty:              r.faculty,
+        level:                r.level,
+        thesis_status:        r.thesis_status || 'Pending',
+        graduation_year:      r.graduation_year,
+        graduation_batch:     batchName,
+        email:                r.email  || null,
+        phone:                r.phone  || null,
+        uploaded_batch_id:    batch.id,
+        duplicate_flag:       false,
+      }));
 
-    const { error: iErr } = await db.from('students').insert(toInsert);
-    if (iErr) throw iErr;
-
-    // Queue all for approval
-    const { data: inserted } = await db
-      .from('students')
-      .select('id')
-      .eq('graduation_batch', batchName);
-
-    if (inserted?.length) {
-      await db.from('qualified_students').insert(
-        inserted.map(s => ({ student_id: s.id, qualification_status: 'Pending' }))
-      );
+    if (toInsert.length === 0) {
+      showToast('No new records to insert after filtering.', 'warning');
+      return;
     }
 
-    await logAudit(`Batch uploaded: ${batchName} (${v.valid} records)`, batchName, 'uploaded_batches');
+    // 3. Insert ONLY new students - existing records are NEVER touched
+    const { data: insertedStudents, error: iErr } = await db
+      .from('students')
+      .insert(toInsert)
+      .select('id');
+    if (iErr) throw iErr;
+
+    // 4. Create qualified_students rows ONLY for the newly inserted IDs
+    //    This prevents touching any previously existing student records
+    if (insertedStudents && insertedStudents.length > 0) {
+      const { error: qErr } = await db
+        .from('qualified_students')
+        .insert(insertedStudents.map(s => ({
+          student_id:           s.id,
+          qualification_status: 'Pending',
+        })));
+      if (qErr && !qErr.message.includes('duplicate')) throw qErr;
+    }
+
+    await logAudit(
+      `Batch uploaded: ${batchName} - ${insertedStudents?.length || 0} new records added`,
+      batchName, 'uploaded_batches'
+    );
     uploadStep = 3;
     renderUploadStep();
 
   } catch (err) {
     showToast('Import failed: ' + err.message, 'error');
-    if (btn) { btn.disabled = false; btn.textContent = `📥 Import ${v.valid} Valid Records`; }
+    if (btn) { btn.disabled = false; btn.textContent = `Import ${v.valid} Valid Records`; }
   }
 }
 
