@@ -196,6 +196,12 @@ function renderUploadStep() {
                       ex:  '2024',
                     },
                     {
+                      col: 'effective_date',
+                      req: true,
+                      fmt: 'Date the qualification took effect. Format: YYYY-MM-DD (e.g. 2024-03-31)',
+                      ex:  '2024-03-31',
+                    },
+                    {
                       col: 'email',
                       req: false,
                       fmt: 'Valid email address. Leave blank if not available.',
@@ -421,6 +427,7 @@ function readFile(file) {
         level:                String(r.level                || r['Level']        || '').trim(),
         thesis_status:        String(r.thesis_status        || r['Thesis Status']|| r['Thesis']  || 'Pending').trim(),
         graduation_year:      parseInt(r.graduation_year   || r['Graduation Year'] || r['Year']  || 0),
+        effective_date:       String(r.effective_date      || r['Effective Date']|| r['Eff Date'] || r['Date'] || '').trim(),
         email:                String(r.email               || r['Email']        || '').trim().toLowerCase(),
         phone:                String(r.phone               || r['Phone']        || '').trim(),
       }));
@@ -533,6 +540,7 @@ async function importBatch() {
         thesis_status:        r.thesis_status || 'Pending',
         graduation_year:      r.graduation_year,
         graduation_batch:     batchName,
+        effective_date:       r.effective_date || null,
         email:                r.email  || null,
         phone:                r.phone  || null,
         uploaded_batch_id:    batch.id,
@@ -582,6 +590,7 @@ async function importBatch() {
         thesis_status:        r.thesis_status || 'Pending',
         graduation_year:      r.graduation_year,
         graduation_batch:     batchName,
+        effective_date:       r.effective_date || null,
         email:                r.email  || null,
         phone:                r.phone  || null,
         uploaded_batch_id:    batch.id,
@@ -627,40 +636,56 @@ function downloadTemplate() {
     {
       student_index_number: 'UCC/GST/2024/001',
       full_name:            'Kwame Asante Mensah',
-      programme:            'MSc Computer Science',
-      department:           'Computer Science',
-      faculty:              'Science',
+      programme:            'Master of Science (Computer Science)',
+      department:           'Computer Science and Information Technology',
+      faculty:              'Faculty of Physical Sciences',
       level:                'Masters',
       thesis_status:        'Submitted',
       graduation_year:      2024,
+      effective_date:       '2024-03-31',
       email:                'k.mensah@stu.ucc.edu.gh',
       phone:                '0244000000',
     },
     {
       student_index_number: 'UCC/GST/2024/002',
       full_name:            'Adwoa Sarpong Boateng',
-      programme:            'PhD Economics',
+      programme:            'Doctor of Philosophy (Economics)',
       department:           'Economics',
-      faculty:              'Social Sciences',
+      faculty:              'Faculty of Social Sciences',
       level:                'PhD',
       thesis_status:        'Examined',
       graduation_year:      2024,
+      effective_date:       '2024-09-30',
       email:                'a.boateng@stu.ucc.edu.gh',
       phone:                '0201000000',
+    },
+    {
+      student_index_number: 'UCC/GST/2024/003',
+      full_name:            'Ama Owusu Barimah',
+      programme:            'Master of Philosophy (English Language)',
+      department:           'English',
+      faculty:              'Faculty of Arts',
+      level:                'MPhil',
+      thesis_status:        'Examined',
+      graduation_year:      2024,
+      effective_date:       '2024-03-31',
+      email:                '',
+      phone:                '',
     },
   ];
 
   const ws = XLSX.utils.json_to_sheet(sampleData, {
     header: [
       'student_index_number','full_name','programme','department',
-      'faculty','level','thesis_status','graduation_year','email','phone',
+      'faculty','level','thesis_status','graduation_year',
+      'effective_date','email','phone',
     ],
   });
 
   // Set column widths
   ws['!cols'] = [
-    { wch:22 },{ wch:28 },{ wch:26 },{ wch:22 },
-    { wch:20 },{ wch:10 },{ wch:16 },{ wch:18 },{ wch:30 },{ wch:15 },
+    { wch:22 },{ wch:30 },{ wch:40 },{ wch:32 },
+    { wch:28 },{ wch:10 },{ wch:16 },{ wch:18 },{ wch:16 },{ wch:30 },{ wch:15 },
   ];
 
   const wb = XLSX.utils.book_new();
