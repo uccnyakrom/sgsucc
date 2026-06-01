@@ -234,7 +234,7 @@ function openAddStudentModal() {
           <label>Level <span style="color:var(--danger)">*</span></label>
           <select id="as-level" class="form-control">
             <option value="">— Select Level —</option>
-            <option value="Masters">Masters</option>
+            <option value="MSc">MSc</option>
             <option value="MPhil">MPhil</option>
             <option value="PhD">PhD</option>
             <option value="MBA">MBA</option>
@@ -695,7 +695,7 @@ async function editStudent(id) {
         <div class="form-group" style="margin:0">
           <label>Level <span style="color:var(--danger)">*</span></label>
           <select id="edit-level" class="form-control">
-            ${['Masters','MPhil','PhD','MBA'].map(l =>
+            ${['MSc','MPhil','PhD','MBA'].map(l =>
               `<option value="${l}" ${s.level===l?'selected':''}>${l}</option>`
             ).join('')}
           </select>
