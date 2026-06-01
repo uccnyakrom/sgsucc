@@ -8,8 +8,8 @@
 //    Supabase Dashboard → Your Project → Settings → API
 // ================================================================
 
-const SUPABASE_URL  = 'https://viflvvqqcgfjhbhnlpci.supabase.co';
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZpZmx2dnFxY2dmamhiaG5scGNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3OTY5NDIsImV4cCI6MjA5NDM3Mjk0Mn0.bM5kHNUgukQyNnqyo9fEtjkEyRO7ZaPlYQrutB8wWdk';
+const SUPABASE_URL  = 'https://YOUR-PROJECT-REF.supabase.co';
+const SUPABASE_ANON = 'YOUR-ANON-PUBLIC-KEY';
 
 // ----------------------------------------------------------------
 //  Do not edit below this line
@@ -147,9 +147,77 @@ function badge(label, color = '#94A3B8') {
   </span>`;
 }
 
+// ── Date & Time helpers — always use Ghana/GMT timezone ──────────────────
+const GH_LOCALE  = 'en-GB';
+const GH_TZ      = 'Africa/Accra';   // GMT+0, same as UTC
+
+/**
+ * Format a date-only value: "15 May 2025"
+ * Works correctly for both date strings (2025-03-31) and
+ * full ISO timestamps (2025-05-15T06:11:05+00:00)
+ */
 function formatDate(d) {
   if (!d) return '—';
-  return new Date(d).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+  try {
+    // For plain date strings (YYYY-MM-DD) avoid timezone shift by
+    // parsing as local noon to prevent off-by-one-day errors
+    const isDateOnly = /^\d{4}-\d{2}-\d{2}$/.test(String(d));
+    const dt = isDateOnly
+      ? new Date(String(d) + 'T12:00:00')   // noon, avoids date shift
+      : new Date(d);
+    if (isNaN(dt)) return String(d);
+    return dt.toLocaleDateString(GH_LOCALE, {
+      day:   '2-digit',
+      month: 'short',
+      year:  'numeric',
+      timeZone: GH_TZ,
+    });
+  } catch (_) { return String(d); }
+}
+
+/**
+ * Format a full timestamp: "15 May 2025, 10:30 AM"
+ * Always displayed in Ghana time (GMT/UTC+0)
+ */
+function formatDateTime(d) {
+  if (!d) return '—';
+  try {
+    const dt = new Date(d);
+    if (isNaN(dt)) return String(d);
+    return dt.toLocaleString(GH_LOCALE, {
+      day:      '2-digit',
+      month:    'short',
+      year:     'numeric',
+      hour:     '2-digit',
+      minute:   '2-digit',
+      hour12:   true,
+      timeZone: GH_TZ,
+    });
+  } catch (_) { return String(d); }
+}
+
+/**
+ * Format time only: "10:30 AM"
+ */
+function formatTime(d) {
+  if (!d) return '—';
+  try {
+    const dt = new Date(d);
+    if (isNaN(dt)) return String(d);
+    return dt.toLocaleTimeString(GH_LOCALE, {
+      hour:     '2-digit',
+      minute:   '2-digit',
+      hour12:   true,
+      timeZone: GH_TZ,
+    });
+  } catch (_) { return String(d); }
+}
+
+/**
+ * Today's date as YYYY-MM-DD in Ghana time
+ */
+function todayGH() {
+  return new Date().toLocaleDateString('en-CA', { timeZone: GH_TZ }); // en-CA gives YYYY-MM-DD
 }
 
 
