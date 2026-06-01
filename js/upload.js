@@ -168,14 +168,14 @@ function renderUploadStep() {
                     {
                       col: 'department',
                       req: true,
-                      fmt: 'Department offering the programme.',
-                      ex:  'Computer Science',
+                      fmt: 'Exact name of the department. Type it as it appears in official UCC documents.',
+                      ex:  'Department of English',
                     },
                     {
                       col: 'faculty',
                       req: true,
-                      fmt: 'Faculty the department belongs to.',
-                      ex:  'Science',
+                      fmt: 'Exact name of the faculty or school. Type as it appears in official UCC documents.',
+                      ex:  'Faculty of Arts',
                     },
                     {
                       col: 'level',
@@ -637,7 +637,7 @@ function downloadTemplate() {
       student_index_number: 'UCC/GST/2024/001',
       full_name:            'Kwame Asante Mensah',
       programme:            'Master of Science (Computer Science)',
-      department:           'Computer Science and Information Technology',
+      department:           'Department of Computer Science',
       faculty:              'Faculty of Physical Sciences',
       level:                'Masters',
       thesis_status:        'Submitted',
