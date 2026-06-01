@@ -5,134 +5,48 @@
 let studentFilters = { search:'', status:'All', cert:'All', faculty:'All' };
 let allStudents = [];
 
-// ── UCC Faculty / Department structure ────────────────────────────────────
-const UCC_FACULTIES = [
-  '— Select Faculty / School —',
-  // College of Agriculture and Natural Sciences
-  'Faculty of Agriculture',
-  'Faculty of Biosciences',
-  'Faculty of Physical Sciences',
-  // College of Distance Education
-  'School of Business Studies (CoDE)',
-  'School of Arts and Social Sciences (CoDE)',
-  'School of Health and Allied Sciences (CoDE)',
-  // College of Education Studies
-  'Faculty of Educational Foundations',
-  'Faculty of Science and Technology Education',
-  'Faculty of Social Sciences Education',
-  // College of Health and Allied Sciences
-  'School of Medical Sciences',
-  'School of Allied Health Sciences',
-  'School of Nursing and Midwifery',
-  // College of Humanities and Legal Studies
-  'Faculty of Arts',
-  'Faculty of Law',
-  'Faculty of Social Sciences',
-  // School of Business
-  'School of Business',
-  'Graduate Business Programmes',
-  // Other
-  'School of Graduate Studies',
-  'Interdisciplinary Studies',
-];
+// ── Dynamic faculty/department suggestions from existing DB data ──────────
+// These are loaded once at app start and used as datalist hints.
+// Admin can type ANYTHING — the suggestions are just hints.
+let _cachedFaculties   = [];
+let _cachedDepartments = [];
 
-const UCC_DEPARTMENTS = [
-  '— Select Department —',
-  // Agriculture & Natural Sciences
-  'Agricultural Economics and Agribusiness',
-  'Animal Science',
-  'Biochemistry and Biotechnology',
-  'Botany',
-  'Chemistry',
-  'Computer Science and Information Technology',
-  'Crop and Soil Sciences',
-  'Fisheries and Aquatic Sciences',
-  'Food Science and Technology',
-  'Mathematics',
-  'Molecular Biology and Biotechnology',
-  'Physics',
-  'Statistics and Actuarial Science',
-  'Zoology',
-  // Education
-  'Agricultural Education',
-  'Arts Education',
-  'Basic Education',
-  'Business and Social Sciences Education',
-  'Early Childhood Education',
-  'Educational Management',
-  'Educational Psychology and Leadership',
-  'Health, Physical Education and Recreation',
-  'Home Economics Education',
-  'Information and Communication Technology Education',
-  'Language Education',
-  'Mathematics and ICT Education',
-  'Science Education',
-  'Special Education',
-  'Teaching in Higher Education',
-  'Technical and Vocational Education',
-  // Health Sciences
-  'Anatomy',
-  'Community Health Nursing',
-  'Medical Biochemistry',
-  'Medical Laboratory Science',
-  'Mental Health Nursing',
-  'Microbiology',
-  'Midwifery',
-  'Occupational Therapy',
-  'Optometry',
-  'Paediatric Nursing',
-  'Pathology',
-  'Perioperative Nursing',
-  'Pharmacy',
-  'Physiotherapy',
-  'Public Health Nursing',
-  'Radiography',
-  // Humanities & Social Sciences
-  'Bilingual Studies',
-  'Economics',
-  'English',
-  'Film and Theatre Studies',
-  'Geography and Tourism',
-  'History',
-  'Law',
-  'Linguistics',
-  'Music and Dance',
-  'Philosophy and Classics',
-  'Political Science',
-  'Psychology',
-  'Religion and Human Values',
-  'Sociology',
-  // Business
-  'Accounting',
-  'Applied Economics',
-  'Business Administration',
-  'Commerce',
-  'Finance',
-  'Human Resource Management',
-  'Management',
-  'Marketing',
-  'Procurement and Supply Chain Management',
-  'Project Management',
-  'Public Health Education',
-  'Public Policy and Administration',
-  'Public Policy and Management',
-  // General
-  'Graduate Studies',
-  'Interdisciplinary Studies',
-];
+async function loadFacultyDeptCache() {
+  // Only load once per session
+  if (_cachedFaculties.length > 0) return;
+  try {
+    const { data: rows } = await db
+      .from('students')
+      .select('faculty, department')
+      .limit(1000);
+    if (rows) {
+      _cachedFaculties   = [...new Set(rows.map(r => r.faculty).filter(Boolean))].sort();
+      _cachedDepartments = [...new Set(rows.map(r => r.department).filter(Boolean))].sort();
+    }
+  } catch(_) {}
+}
 
-// ── Helper: build a <select> options string ───────────────────────────────
-function buildOptions(arr, selectedVal='') {
-  return arr.map(v => {
-    const isPlaceholder = v.startsWith('—');
-    return `<option value="${isPlaceholder?'':v}" ${selectedVal===v?'selected':''} ${isPlaceholder?'disabled':''}>
-      ${escHtml(v)}
-    </option>`;
-  }).join('');
+// Build a <datalist> + <input> combo — free text with autocomplete hints
+function datalistField(inputId, datalistId, value, placeholder, required) {
+  const opts = datalistId === 'dl-faculty'
+    ? _cachedFaculties
+    : _cachedDepartments;
+  return `
+    <input type="text" id="${inputId}" class="form-control"
+      list="${datalistId}"
+      value="${escHtml(value||'')}"
+      placeholder="${escHtml(placeholder)}"
+      autocomplete="off"
+      ${required ? 'required' : ''}>
+    <datalist id="${datalistId}">
+      ${opts.map(o => `<option value="${escHtml(o)}">`).join('')}
+    </datalist>
+  `;
 }
 
 // ── Render students page ──────────────────────────────────────────────────
 async function renderStudents() {
+  await loadFacultyDeptCache();   // pre-load suggestions from DB
   const content = document.getElementById('page-content');
 
   const { data, error } = await db
@@ -330,15 +244,15 @@ function openAddStudentModal() {
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
         <div class="form-group" style="margin:0">
           <label>Faculty / School <span style="color:var(--danger)">*</span></label>
-          <select id="as-faculty" class="form-control">
-            ${buildOptions(UCC_FACULTIES)}
-          </select>
+          ${datalistField('as-faculty','dl-faculty','',
+            'e.g. Faculty of Arts', true)}
+          <small style="color:var(--gray-400)">Type the exact name — suggestions appear as you type</small>
         </div>
         <div class="form-group" style="margin:0">
           <label>Department <span style="color:var(--danger)">*</span></label>
-          <select id="as-department" class="form-control">
-            ${buildOptions(UCC_DEPARTMENTS)}
-          </select>
+          ${datalistField('as-department','dl-department','',
+            'e.g. English', true)}
+          <small style="color:var(--gray-400)">Type the exact name — suggestions appear as you type</small>
         </div>
       </div>
 
@@ -430,8 +344,8 @@ async function submitAddStudent() {
   if (!index)   { showAlert('Please enter the student index number.', 'warning'); return; }
   if (!name)    { showAlert('Please enter the student full name.', 'warning'); return; }
   if (!prog)    { showAlert('Please enter the programme name.', 'warning'); return; }
-  if (!faculty || faculty.startsWith('—')) { showAlert('Please select a Faculty / School.', 'warning'); return; }
-  if (!dept || dept.startsWith('—'))       { showAlert('Please select a Department.', 'warning'); return; }
+  if (!faculty) { showAlert('Please enter the Faculty / School name.', 'warning'); return; }
+  if (!dept)    { showAlert('Please enter the Department name.', 'warning'); return; }
   if (!level)   { showAlert('Please select a level.', 'warning'); return; }
   if (!effdate) { showAlert('Please enter the effective date.', 'warning'); return; }
   if (!batch)   { showAlert('Please enter a batch name.', 'warning'); return; }
@@ -702,15 +616,15 @@ async function editStudent(id) {
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
         <div class="form-group" style="margin:0">
           <label>Faculty / School <span style="color:var(--danger)">*</span></label>
-          <select id="edit-faculty" class="form-control">
-            ${buildOptions(UCC_FACULTIES, s.faculty||'')}
-          </select>
+          ${datalistField('edit-faculty','dl-faculty-edit',
+            s.faculty||'', 'e.g. Faculty of Arts', true)}
+          <small style="color:var(--gray-400)">Type freely — existing faculties appear as suggestions</small>
         </div>
         <div class="form-group" style="margin:0">
           <label>Department <span style="color:var(--danger)">*</span></label>
-          <select id="edit-department" class="form-control">
-            ${buildOptions(UCC_DEPARTMENTS, s.department||'')}
-          </select>
+          ${datalistField('edit-department','dl-department-edit',
+            s.department||'', 'e.g. English', true)}
+          <small style="color:var(--gray-400)">Type freely — existing departments appear as suggestions</small>
         </div>
       </div>
 
@@ -812,8 +726,8 @@ async function submitEditStudent(id) {
 
   // Validate
   if (!programme)  { showAlert('Programme cannot be empty.', 'warning'); return; }
-  if (!faculty || faculty.startsWith('—')) { showAlert('Please select a Faculty / School.', 'warning'); return; }
-  if (!department || department.startsWith('—')) { showAlert('Please select a Department.', 'warning'); return; }
+  if (!faculty)    { showAlert('Please enter the Faculty / School name.', 'warning'); return; }
+  if (!department) { showAlert('Please enter the Department name.', 'warning'); return; }
   if (!year || year < 2000 || year > 2099) { showAlert('Please enter a valid graduation year.', 'warning'); return; }
 
   // Apply smart casing to programme
