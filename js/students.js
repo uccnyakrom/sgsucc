@@ -257,6 +257,8 @@ function filterStudents() {
         <td>
           <div style="display:flex;gap:6px">
             <button class="btn btn-ghost btn-sm" onclick="viewStudent('${s.id}')">View</button>
+            ${window.currentUser?.role === 'Super Administrator'
+              ? `<button class="btn btn-outline btn-sm" onclick="editStudent('${s.id}')">✏️ Edit</button>` : ''}
             ${can('approve') && approvalStatus==='Pending'
               ? `<button class="btn btn-gold btn-sm" onclick="reviewStudent('${s.id}')">Review</button>`:''}
             ${can('verify') && approvalStatus==='Pending'
@@ -575,6 +577,8 @@ async function viewStudent(id) {
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal()">Close</button>
+      ${window.currentUser?.role === 'Super Administrator'
+        ? `<button class="btn btn-outline" onclick="closeModal();editStudent('${s.id}')">✏️ Edit Record</button>` : ''}
       ${can('approve') && approvalStatus==='Pending'
         ? `<button class="btn btn-gold" onclick="closeModal();reviewStudent('${s.id}')">Review This Student</button>`:''}
     </div>
@@ -646,5 +650,229 @@ async function submitReview(id, status) {
     status==='Approved'?'success':'warning'
   );
   closeModal();
+  await renderStudents();
+}
+
+
+// ================================================================
+//  EDIT STUDENT RECORD — Super Administrator only
+//  Allows editing: Programme, Faculty, Department, Level,
+//  Thesis Status, Graduation Year, Effective Date, Email, Phone
+// ================================================================
+async function editStudent(id) {
+  const s = allStudents.find(x => x.id === id);
+  if (!s) return;
+
+  if (window.currentUser?.role !== 'Super Administrator') {
+    showToast('Only Super Administrators can edit student records.', 'error');
+    return;
+  }
+
+  openModal(`
+    <div class="modal-head">
+      <h3>✏️ Edit Student Record</h3>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Identity — read-only -->
+      <div style="padding:12px 14px;background:var(--gray-50);border-radius:10px;
+           margin-bottom:18px;display:flex;align-items:center;gap:12px">
+        <div style="font-size:22px">🎓</div>
+        <div>
+          <div style="font-size:15px;font-weight:800;color:var(--navy)">${escHtml(s.full_name)}</div>
+          <div style="font-size:12px;color:var(--gray-400);font-family:monospace">${escHtml(s.student_index_number)}</div>
+        </div>
+        <div style="margin-left:auto;font-size:11px;color:var(--gray-400);text-align:right">
+          Index and name are read-only.<br>Contact IT to change these.
+        </div>
+      </div>
+
+      <div id="edit-stu-alert" style="display:none"></div>
+
+      <!-- Row 1: Programme -->
+      <div class="form-group" style="margin-bottom:14px">
+        <label>Programme <span style="color:var(--danger)">*</span></label>
+        <input type="text" id="edit-programme" class="form-control"
+          value="${escHtml(s.programme||'')}"
+          placeholder="e.g. Master of Philosophy (English Language)">
+      </div>
+
+      <!-- Row 2: Faculty + Department -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+        <div class="form-group" style="margin:0">
+          <label>Faculty / School <span style="color:var(--danger)">*</span></label>
+          <select id="edit-faculty" class="form-control">
+            ${buildOptions(UCC_FACULTIES, s.faculty||'')}
+          </select>
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>Department <span style="color:var(--danger)">*</span></label>
+          <select id="edit-department" class="form-control">
+            ${buildOptions(UCC_DEPARTMENTS, s.department||'')}
+          </select>
+        </div>
+      </div>
+
+      <!-- Row 3: Level + Thesis Status -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+        <div class="form-group" style="margin:0">
+          <label>Level <span style="color:var(--danger)">*</span></label>
+          <select id="edit-level" class="form-control">
+            ${['Masters','MPhil','PhD','MBA'].map(l =>
+              `<option value="${l}" ${s.level===l?'selected':''}>${l}</option>`
+            ).join('')}
+          </select>
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>Thesis / Project Status</label>
+          <select id="edit-thesis" class="form-control">
+            ${['Submitted','Examined','Pending','N/A'].map(t =>
+              `<option value="${t}" ${s.thesis_status===t?'selected':''}>${t}</option>`
+            ).join('')}
+          </select>
+        </div>
+      </div>
+
+      <!-- Row 4: Graduation Year + Effective Date -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+        <div class="form-group" style="margin:0">
+          <label>Graduation Year <span style="color:var(--danger)">*</span></label>
+          <input type="number" id="edit-year" class="form-control"
+            value="${s.graduation_year||''}" min="2000" max="2099">
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>Effective Date</label>
+          <input type="date" id="edit-effdate" class="form-control"
+            value="${s.effective_date||''}">
+        </div>
+      </div>
+
+      <!-- Row 5: Email + Phone -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+        <div class="form-group" style="margin:0">
+          <label>Email Address</label>
+          <input type="email" id="edit-email" class="form-control"
+            value="${escHtml(s.email||'')}" placeholder="student@ucc.edu.gh">
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>Phone Number</label>
+          <input type="tel" id="edit-phone" class="form-control"
+            value="${escHtml(s.phone||'')}" placeholder="0244000000">
+        </div>
+      </div>
+
+      <!-- Batch Name (editable) -->
+      <div class="form-group">
+        <label>Batch Name</label>
+        <input type="text" id="edit-batch" class="form-control"
+          value="${escHtml(s.graduation_batch||'')}">
+        <small style="color:var(--gray-400)">Only change if this record was assigned to the wrong batch.</small>
+      </div>
+
+      <!-- Audit note -->
+      <div class="alert alert-warning" style="margin-top:12px">
+        <span>⚠️</span>
+        <div style="font-size:13px">
+          All changes are logged in the audit trail with your name and timestamp.
+          Only edit records when there is a verified reason to do so.
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-gold" onclick="submitEditStudent('${id}')">💾 Save Changes</button>
+    </div>
+  `, '660px');
+}
+
+async function submitEditStudent(id) {
+  const alertEl = document.getElementById('edit-stu-alert');
+  const showAlert = (msg, type) => {
+    alertEl.innerHTML    = `<div class="alert alert-${type}" style="margin-bottom:14px">
+      <span>${type==='error'?'❌':'⚠️'}</span><div>${msg}</div></div>`;
+    alertEl.style.display = 'block';
+  };
+  alertEl.style.display = 'none';
+
+  const s = allStudents.find(x => x.id === id);
+
+  // Collect new values
+  const programme  = document.getElementById('edit-programme')?.value.trim();
+  const faculty    = document.getElementById('edit-faculty')?.value;
+  const department = document.getElementById('edit-department')?.value;
+  const level      = document.getElementById('edit-level')?.value;
+  const thesis     = document.getElementById('edit-thesis')?.value;
+  const year       = parseInt(document.getElementById('edit-year')?.value);
+  const effdate    = document.getElementById('edit-effdate')?.value;
+  const email      = document.getElementById('edit-email')?.value.trim();
+  const phone      = document.getElementById('edit-phone')?.value.trim();
+  const batch      = document.getElementById('edit-batch')?.value.trim();
+
+  // Validate
+  if (!programme)  { showAlert('Programme cannot be empty.', 'warning'); return; }
+  if (!faculty || faculty.startsWith('—')) { showAlert('Please select a Faculty / School.', 'warning'); return; }
+  if (!department || department.startsWith('—')) { showAlert('Please select a Department.', 'warning'); return; }
+  if (!year || year < 2000 || year > 2099) { showAlert('Please enter a valid graduation year.', 'warning'); return; }
+
+  // Apply smart casing to programme
+  const safeProg = typeof smartCase === 'function' ? smartCase(programme) : programme;
+
+  // Build update object — track what changed for audit log
+  const changes = [];
+  if (safeProg   !== s.programme)        changes.push(`Programme: "${s.programme}" → "${safeProg}"`);
+  if (faculty    !== s.faculty)          changes.push(`Faculty: "${s.faculty}" → "${faculty}"`);
+  if (department !== s.department)       changes.push(`Department: "${s.department}" → "${department}"`);
+  if (level      !== s.level)            changes.push(`Level: "${s.level}" → "${level}"`);
+  if (thesis     !== s.thesis_status)    changes.push(`Thesis: "${s.thesis_status}" → "${thesis}"`);
+  if (year       !== s.graduation_year)  changes.push(`Year: ${s.graduation_year} → ${year}`);
+  if ((effdate||'') !== (s.effective_date||'')) changes.push(`Effective Date: "${s.effective_date||'—'}" → "${effdate||'—'}"`);
+  if ((email||'')   !== (s.email||''))   changes.push(`Email updated`);
+  if ((phone||'')   !== (s.phone||''))   changes.push(`Phone updated`);
+  if ((batch||'')   !== (s.graduation_batch||'')) changes.push(`Batch: "${s.graduation_batch}" → "${batch}"`);
+
+  if (changes.length === 0) {
+    showAlert('No changes detected. Nothing was saved.', 'warning');
+    return;
+  }
+
+  // Disable save button during request
+  const btn = document.getElementById ? null : null;
+  const saveBtn = document.querySelector('#modal-overlay .btn-gold');
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Saving…'; }
+
+  const { error } = await db
+    .from('students')
+    .update({
+      programme:       safeProg,
+      faculty,
+      department,
+      level,
+      thesis_status:   thesis,
+      graduation_year: year,
+      effective_date:  effdate || null,
+      email:           email   || null,
+      phone:           phone   || null,
+      graduation_batch: batch  || s.graduation_batch,
+    })
+    .eq('id', id);
+
+  if (error) {
+    showAlert('Error saving changes: ' + error.message, 'error');
+    if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = '💾 Save Changes'; }
+    return;
+  }
+
+  // Log every change to the audit trail
+  const changeStr = changes.join(' | ');
+  await logAudit(
+    `Student record edited: ${changeStr}`,
+    s.student_index_number,
+    'students'
+  );
+
+  closeModal();
+  showToast(`✅ Record updated for ${s.full_name}`, 'success');
   await renderStudents();
 }
