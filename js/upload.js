@@ -180,8 +180,8 @@ function renderUploadStep() {
                     {
                       col: 'level',
                       req: true,
-                      fmt: 'Exactly one of: <code>Masters</code> · <code>MPhil</code> · <code>PhD</code> · <code>MBA</code>',
-                      ex:  'Masters',
+                      fmt: 'Exactly one of: <code>MSc</code> · <code>MPhil</code> · <code>PhD</code> · <code>MBA</code>',
+                      ex:  'MSc',
                     },
                     {
                       col: 'thesis_status',
@@ -249,7 +249,7 @@ function renderUploadStep() {
                   'Do not rename or reorder the column headers.',
                   'Do not include merged cells, coloured rows, or extra formatting.',
                   'The first row must be the header row — no title rows above it.',
-                  'The <code>level</code> column must be exactly: Masters, MPhil, PhD, or MBA.',
+                  'The <code>level</code> column must be exactly: MSc, MPhil, PhD, or MBA.',
                   'The <code>graduation_year</code> must be a number (2024), not text ("2024").',
                   'Do not include a serial number or row-count column.',
                   'Remove any blank rows between records.',
@@ -639,7 +639,7 @@ function downloadTemplate() {
       programme:            'Master of Science (Computer Science)',
       department:           'Department of Computer Science',
       faculty:              'Faculty of Physical Sciences',
-      level:                'Masters',
+      level:                'MSc',
       thesis_status:        'Submitted',
       graduation_year:      2024,
       effective_date:       '2024-03-31',
