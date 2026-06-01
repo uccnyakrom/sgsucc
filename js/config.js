@@ -8,8 +8,8 @@
 //    Supabase Dashboard → Your Project → Settings → API
 // ================================================================
 
-const SUPABASE_URL  = 'https://viflvvqqcgfjhbhnlpci.supabase.co';
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZpZmx2dnFxY2dmamhiaG5scGNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3OTY5NDIsImV4cCI6MjA5NDM3Mjk0Mn0.bM5kHNUgukQyNnqyo9fEtjkEyRO7ZaPlYQrutB8wWdk';
+const SUPABASE_URL  = 'https://YOUR-PROJECT-REF.supabase.co';
+const SUPABASE_ANON = 'YOUR-ANON-PUBLIC-KEY';
 
 // ----------------------------------------------------------------
 //  Do not edit below this line
@@ -150,6 +150,44 @@ function badge(label, color = '#94A3B8') {
 function formatDate(d) {
   if (!d) return '—';
   return new Date(d).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+}
+
+
+// ----------------------------------------------------------------
+//  smartCase — converts ALL CAPS or lowercase to proper sentence case
+//  "DEPARTMENT OF ENGLISH" → "Department of English"
+//  "MASTER OF PHILOSOPHY ( ENGLISH LANGUAGE)" → "Master of Philosophy (English Language)"
+// ----------------------------------------------------------------
+function smartCase(str) {
+  if (!str) return str;
+  const minorWords = new Set([
+    'a','an','the','and','but','or','nor','for','so','yet',
+    'at','by','in','of','on','to','up','as','is','it',
+  ]);
+
+  const capWord = (word) =>
+    word.split('-').map(part => part.charAt(0).toUpperCase() + part.slice(1)).join('-');
+
+  return str
+    .toLowerCase()
+    .replace(/\s*\(\s*/g, ' (')
+    .replace(/\s*\)\s*/g, ') ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .split(' ')
+    .map((word, idx, arr) => {
+      if (!word) return word;
+      const isAfterParen = idx > 0 && arr[idx - 1] && arr[idx - 1].endsWith('(');
+      const bare = word.replace(/[()]/g, '');
+      if (idx === 0 || isAfterParen || word.startsWith('(') || !minorWords.has(bare)) {
+        return word.startsWith('(') ? '(' + capWord(word.slice(1)) : capWord(word);
+      }
+      return word;
+    })
+    .join(' ')
+    .replace(/\s+\)/g, ')')
+    .replace(/\(\s+/g, '(')
+    .trim();
 }
 
 function escHtml(str) {
