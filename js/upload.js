@@ -479,42 +479,44 @@ async function validateRows(batchName) {
   const issuedIndexSet = new Set((issued || []).map(s => s.student_index_number));
   const issuedNameSet  = new Set((issued || []).map(s => normaliseName(s.full_name)));
 
-  // ── Check for duplicates within the uploaded file itself ───────
-  const fileIndexSeen = new Set();
-  const fileNameSeen  = new Set();
+  // ── Pre-scan file to find within-file duplicates ─────────────
+  // Count occurrences of each index and name in the file itself
+  const fileIndexCount = {};
+  const fileNameCount  = {};
+  validRows.forEach(r => {
+    const idx  = r.student_index_number;
+    const name = normaliseName(r.full_name);
+    fileIndexCount[idx]  = (fileIndexCount[idx]  || 0) + 1;
+    fileNameCount[name]  = (fileNameCount[name]   || 0) + 1;
+  });
 
   // ── Build dup arrays ──────────────────────────────────────────
-  // dupsByIndex: index number already exists in DB
-  const dupsByIndex = [];
-  // dupsByName: full name already exists in DB (possible same person, different index)
-  const dupsByName  = [];
-  // dupsByIssuedIndex: cert already issued for this index
-  const alreadyIssued = [];
+  const dupsByIndex   = [];   // index exists in DB or appears 2+ times in file
+  const dupsByName    = [];   // name exists in DB or appears 2+ times in file
+  const alreadyIssued = [];   // cert already issued
 
   validRows.forEach(r => {
     const idx  = r.student_index_number;
     const name = normaliseName(r.full_name);
 
+    // Block if already issued
     if (issuedIndexSet.has(idx) || issuedNameSet.has(name)) {
-      alreadyIssued.push(idx);
+      if (!alreadyIssued.includes(idx)) alreadyIssued.push(idx);
       return;
     }
 
-    // Duplicate index — exists in DB OR appears twice in this file
-    if (existingIndexSet.has(idx) || fileIndexSeen.has(idx)) {
+    // Duplicate index: exists in DB OR appears more than once in this file
+    if (existingIndexSet.has(idx) || fileIndexCount[idx] > 1) {
       if (!dupsByIndex.includes(idx)) dupsByIndex.push(idx);
     }
 
-    // Duplicate name — exists in DB OR appears twice in this file
-    if (existingNameSet.has(name) || fileNameSeen.has(name)) {
+    // Duplicate name: exists in DB OR appears more than once in this file
+    if (existingNameSet.has(name) || fileNameCount[name] > 1) {
       if (!dupsByName.includes(idx)) dupsByName.push(idx);
     }
-
-    fileIndexSeen.add(idx);
-    fileNameSeen.add(name);
   });
 
-  // Combined dups list (union of index and name dups)
+  // Combined dups — union of index and name dups
   const allDupIndexes = [...new Set([...dupsByIndex, ...dupsByName])];
 
   const valid = validRows.filter(r =>
