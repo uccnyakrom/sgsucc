@@ -173,8 +173,10 @@ function filterStudents() {
             <button class="btn btn-ghost btn-sm" onclick="viewStudent('${s.id}')">View</button>
             ${window.currentUser?.role === 'Super Administrator'
               ? `<button class="btn btn-outline btn-sm" onclick="editStudent('${s.id}')">✏️ Edit</button>` : ''}
-            ${can('approve') && approvalStatus==='Pending'
-              ? `<button class="btn btn-gold btn-sm" onclick="reviewStudent('${s.id}')">Review</button>`:''}
+            ${can('approve') && (approvalStatus==='Pending' || approvalStatus==='Verified')
+              ? `<button class="btn btn-gold btn-sm" onclick="reviewStudent('${s.id}')">
+                   ${approvalStatus==='Verified' ? '✅ Approve' : 'Review'}
+                 </button>` : ''}
             ${can('verify') && approvalStatus==='Pending'
               ? `<button class="btn btn-outline btn-sm" onclick="verifyStudent('${s.id}')">Verify</button>`:''}
           </div>
@@ -493,8 +495,10 @@ async function viewStudent(id) {
       <button class="btn btn-ghost" onclick="closeModal()">Close</button>
       ${window.currentUser?.role === 'Super Administrator'
         ? `<button class="btn btn-outline" onclick="closeModal();editStudent('${s.id}')">✏️ Edit Record</button>` : ''}
-      ${can('approve') && approvalStatus==='Pending'
-        ? `<button class="btn btn-gold" onclick="closeModal();reviewStudent('${s.id}')">Review This Student</button>`:''}
+      ${can('approve') && (approvalStatus==='Pending' || approvalStatus==='Verified')
+        ? `<button class="btn btn-gold" onclick="closeModal();reviewStudent('${s.id}')">
+             ${approvalStatus==='Verified' ? '✅ Approve for Certificate' : 'Review This Student'}
+           </button>` : ''}
     </div>
   `, '640px');
 }
@@ -520,7 +524,7 @@ async function reviewStudent(id) {
   if (!s) return;
   openModal(`
     <div class="modal-head">
-      <h3>Review Student Record</h3>
+      <h3>${s.approval_status==='Verified' ? '✅ Approve for Certificate Issuance' : 'Review Student Record'}</h3>
       <button class="modal-close" onclick="closeModal()">×</button>
     </div>
     <div class="modal-body">
@@ -529,6 +533,11 @@ async function reviewStudent(id) {
         ${escHtml(s.full_name)} &middot; ${escHtml(s.programme)} &middot; ${s.graduation_year}
         ${s.effective_date?` &middot; Effective: ${formatDate(s.effective_date)}`:''}
       </div>
+      ${s.approval_status==='Verified' ? `
+        <div class="alert alert-success" style="margin-bottom:14px">
+          <span>✅</span>
+          <div>This record has been <strong>Verified</strong> and is ready for approval.</div>
+        </div>` : ''}
       ${s.duplicate_flag?`<div class="alert alert-warning" style="margin-bottom:14px">
         <span>⚠️</span><div>This record has a <strong>duplicate flag</strong>. Verify carefully before approving.</div>
       </div>`:''}
