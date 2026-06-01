@@ -355,17 +355,40 @@ async function submitAddStudent() {
     showAlert('Please enter a valid graduation year (e.g. 2024).', 'warning'); return;
   }
 
-  // Check for duplicate index in same batch
-  const { data: existing } = await db
+  // Check for duplicate index number anywhere in the system
+  const { data: dupByIndex } = await db
     .from('students')
-    .select('id')
+    .select('id, graduation_batch, full_name')
     .eq('student_index_number', index)
-    .eq('graduation_batch', batch)
     .maybeSingle();
 
-  if (existing) {
-    showAlert(`Index number <strong>${escHtml(index)}</strong> already exists in batch <strong>${escHtml(batch)}</strong>.`, 'error');
+  if (dupByIndex) {
+    showAlert(
+      `Index number <strong>${escHtml(index)}</strong> already exists in the system ` +
+      `(Batch: <strong>${escHtml(dupByIndex.graduation_batch)}</strong>, ` +
+      `Name: <strong>${escHtml(dupByIndex.full_name)}</strong>). ` +
+      `Please verify this is not a duplicate record.`,
+      'error'
+    );
     return;
+  }
+
+  // Check for duplicate name (case-insensitive)
+  const normName = name.toLowerCase().replace(/\s+/g, ' ').trim();
+  const { data: dupByName } = await db
+    .from('students')
+    .select('id, student_index_number, graduation_batch')
+    .ilike('full_name', name)
+    .maybeSingle();
+
+  if (dupByName) {
+    // Show warning but allow override — name duplicates may be coincidental
+    const confirmAdd = window.confirm(
+      `A student named "${name}" already exists in the system ` +
+      `(Index: ${dupByName.student_index_number}, Batch: ${dupByName.graduation_batch}). ` +
+      `\n\nAre you sure this is a different student and not a duplicate?`
+    );
+    if (!confirmAdd) return;
   }
 
   // Apply smart casing
