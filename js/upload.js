@@ -275,12 +275,13 @@ function renderUploadStep() {
   else if (uploadStep === 2 && validationResult) {
     const v = validationResult;
     content.innerHTML = stepHTML + `
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px">
         ${[
           { label:'Total Records', value:v.total,             c:'var(--success)', bg:'#F0FDF4', br:'#BBF7D0' },
           { label:'Valid Records', value:v.valid,             c:'var(--success)', bg:'#DCFCE7', br:'#86EFAC' },
-          { label:'Duplicates',    value:v.dups.length,       c: v.dups.length       ? 'var(--warning)' : 'var(--success)', bg: v.dups.length       ? '#FEF3C7' : '#F0FDF4', br: v.dups.length       ? '#FDE68A' : '#BBF7D0' },
-          { label:'Already Issued',value:v.alreadyIssued.length, c: v.alreadyIssued.length ? 'var(--danger)'  : 'var(--success)', bg: v.alreadyIssued.length ? '#FEE2E2' : '#F0FDF4', br: v.alreadyIssued.length ? '#FECACA' : '#BBF7D0' },
+          { label:'Index Duplicates', value:(v.dupsByIndex||[]).length, c:(v.dupsByIndex||[]).length?'var(--warning)':'var(--success)', bg:(v.dupsByIndex||[]).length?'#FEF3C7':'#F0FDF4', br:(v.dupsByIndex||[]).length?'#FDE68A':'#BBF7D0' },
+          { label:'Name Duplicates',  value:(v.dupsByName||[]).length,  c:(v.dupsByName||[]).length ?'#92400E':'var(--success)', bg:(v.dupsByName||[]).length ?'#FEF3C7':'#F0FDF4', br:(v.dupsByName||[]).length ?'#FDE68A':'#BBF7D0' },
+          { label:'Already Issued',  value:v.alreadyIssued.length,     c:v.alreadyIssued.length?'var(--danger)':'var(--success)',bg:v.alreadyIssued.length?'#FEE2E2':'#F0FDF4',br:v.alreadyIssued.length?'#FECACA':'#BBF7D0' },
         ].map(s => `
           <div style="background:${s.bg};border:1px solid ${s.br};border-radius:12px;padding:16px;text-align:center">
             <div style="font-size:28px;font-weight:800;color:${s.c}">${s.value}</div>
@@ -315,10 +316,20 @@ function renderUploadStep() {
             </tr></thead>
             <tbody>
               ${parsedRows.map((row, idx) => {
+                const isDupIdx = (v.dupsByIndex||[]).includes(row.student_index_number);
+                const isDupNam = (v.dupsByName||[]).includes(row.student_index_number);
                 const isDup    = v.dups.includes(row.student_index_number);
                 const isCert   = v.alreadyIssued.includes(row.student_index_number);
                 const isError  = v.errors.find(e => e.row === idx + 2);
-                return `<tr style="background:${isDup||isCert?'#FFF7ED':isError?'#FEF2F2':''}">
+                const rowBg    = isDup||isCert ? '#FFF7ED' : isError ? '#FEF2F2' : '';
+                let sb;
+                if      (isError)              sb = badge('⚠️ Missing Fields',   'Rejected');
+                else if (isCert)               sb = badge('🏅 Cert Issued',       'Issued');
+                else if (isDupIdx && isDupNam) sb = badge('⚠️ Dup Index+Name',   'Rejected');
+                else if (isDupIdx)             sb = badge('⚠️ Duplicate Index',  'Rejected');
+                else if (isDupNam)             sb = badge('⚠️ Duplicate Name',   'Rejected');
+                else                           sb = badge('✅ Valid',             'Approved');
+                return `<tr style="background:${rowBg}">
                   <td style="font-size:11px;color:var(--gray-400)">${idx + 2}</td>
                   <td style="font-family:monospace;font-size:12px;font-weight:700;color:var(--navy)">
                     ${escHtml(row.student_index_number)}
@@ -326,12 +337,7 @@ function renderUploadStep() {
                   <td style="font-size:13px;font-weight:600">${escHtml(row.full_name)}</td>
                   <td style="font-size:12px;color:var(--gray-600)">${escHtml(row.programme)}</td>
                   <td style="font-size:12px">${escHtml(row.level)}</td>
-                  <td>
-                    ${isError  ? badge('⚠️ Missing Fields', 'Rejected')
-                    : isDup    ? badge('⚠️ Duplicate',      'Rejected')
-                    : isCert   ? badge('🏅 Cert Issued',    'Issued')
-                               : badge('✅ Valid',           'Approved')}
-                  </td>
+                  <td>${sb}</td>
                 </tr>`;
               }).join('')}
             </tbody>
@@ -452,45 +458,88 @@ async function validateRows(batchName) {
   });
 
   const validRows = parsedRows.filter((_, i) => !errors.find(e => e.row === i + 2));
-  const indexes   = validRows.map(r => r.student_index_number);
+  const indexes = validRows.map(r => r.student_index_number);
+  const names   = validRows.map(r => normaliseName(r.full_name));
 
-  // Check existing index numbers in DB
-  // A duplicate is SAME index number in SAME batch only
-  // Same student in a different year/batch is allowed
+  // ── Fetch existing students for comparison ────────────────────
   const { data: existing } = await db
     .from('students')
-    .select('student_index_number, graduation_batch')
-    .in('student_index_number', indexes.length ? indexes : ['__none__']);
+    .select('student_index_number, full_name')
+    .limit(5000);
 
-  // Build a set of "index|batch" combinations that already exist
-  const existingSet = new Set(
-    (existing || []).map(s => s.student_index_number + '|' + batchName)
-  );
-  // Also flag pure index duplicates within same batch from the file itself
-  const existingIndexOnly = new Set((existing || []).map(s => s.student_index_number));
+  const existingIndexSet = new Set((existing || []).map(s => s.student_index_number));
+  const existingNameSet  = new Set((existing || []).map(s => normaliseName(s.full_name)));
 
-  // Check already-issued (these should never get a second certificate
-  // regardless of batch or year)
+  // ── Check already-issued (block regardless of batch/year) ─────
   const { data: issued } = await db
     .from('students_full')
-    .select('student_index_number')
+    .select('student_index_number, full_name')
     .in('cert_status', ['Issued', 'Collected'])
-    .in('student_index_number', indexes.length ? indexes : ['__none__']);
-  const issuedSet = new Set((issued || []).map(s => s.student_index_number));
+    .limit(5000);
+  const issuedIndexSet = new Set((issued || []).map(s => s.student_index_number));
+  const issuedNameSet  = new Set((issued || []).map(s => normaliseName(s.full_name)));
 
-  // Flag as duplicate only if the index exists in the SAME batch name
-  const dups = validRows
-    .filter(r => existingIndexOnly.has(r.student_index_number))
-    .map(r => r.student_index_number);
-  const alreadyIssued = indexes.filter(idx => issuedSet.has(idx));
-  const valid        = validRows.filter(r =>
-    !dups.includes(r.student_index_number) &&
+  // ── Check for duplicates within the uploaded file itself ───────
+  const fileIndexSeen = new Set();
+  const fileNameSeen  = new Set();
+
+  // ── Build dup arrays ──────────────────────────────────────────
+  // dupsByIndex: index number already exists in DB
+  const dupsByIndex = [];
+  // dupsByName: full name already exists in DB (possible same person, different index)
+  const dupsByName  = [];
+  // dupsByIssuedIndex: cert already issued for this index
+  const alreadyIssued = [];
+
+  validRows.forEach(r => {
+    const idx  = r.student_index_number;
+    const name = normaliseName(r.full_name);
+
+    if (issuedIndexSet.has(idx) || issuedNameSet.has(name)) {
+      alreadyIssued.push(idx);
+      return;
+    }
+
+    // Duplicate index — exists in DB OR appears twice in this file
+    if (existingIndexSet.has(idx) || fileIndexSeen.has(idx)) {
+      if (!dupsByIndex.includes(idx)) dupsByIndex.push(idx);
+    }
+
+    // Duplicate name — exists in DB OR appears twice in this file
+    if (existingNameSet.has(name) || fileNameSeen.has(name)) {
+      if (!dupsByName.includes(idx)) dupsByName.push(idx);
+    }
+
+    fileIndexSeen.add(idx);
+    fileNameSeen.add(name);
+  });
+
+  // Combined dups list (union of index and name dups)
+  const allDupIndexes = [...new Set([...dupsByIndex, ...dupsByName])];
+
+  const valid = validRows.filter(r =>
+    !allDupIndexes.includes(r.student_index_number) &&
     !alreadyIssued.includes(r.student_index_number)
   ).length;
 
-  validationResult = { total: parsedRows.length, valid, dups, alreadyIssued, errors };
+  validationResult = {
+    total: parsedRows.length,
+    valid,
+    dups:         allDupIndexes,
+    dupsByIndex,
+    dupsByName,
+    alreadyIssued,
+    errors,
+  };
   uploadStep = 2;
   renderUploadStep();
+}
+
+// Normalise a name for comparison — lowercase, trim extra spaces
+// e.g. "  KWAME  ASANTE " → "kwame asante"
+function normaliseName(name) {
+  if (!name) return '';
+  return String(name).toLowerCase().replace(/\s+/g, ' ').trim();
 }
 
 async function importBatch() {
