@@ -235,7 +235,7 @@ async function generateReport(type, format) {
         .order('created_at', { ascending: false })
         .limit(500);
       data = (rows||[]).map(l => ({
-        'Timestamp':       l.created_at ? new Date(l.created_at).toLocaleString('en-GB') : '',
+        'Timestamp':       l.created_at ? formatDateTime(l.created_at) : '',
         'User':            l.user_name  || 'System',
         'Role':            l.user_role  || '',
         'Activity':        l.activity   || '',
@@ -329,7 +329,7 @@ function exportPDF(data, filename, type) {
   // Date top right
   doc.setFontSize(8);
   doc.setTextColor(200, 146, 42);
-  doc.text(`Generated: ${new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'long', year:'numeric' })}`, 283, 9, { align: 'right' });
+  doc.text(`Generated: ${formatDate(new Date())}  ${formatTime(new Date())}`, 283, 9, { align: 'right' });
   doc.setTextColor(200, 200, 200);
   doc.text('School of Graduate Studies', 283, 17, { align: 'right' });
 
@@ -369,7 +369,8 @@ function exportPDF(data, filename, type) {
 
 // ── Helper ──────────────────────────────────────────────────────
 function today() {
-  return new Date().toISOString().split('T')[0];
+  // Use Ghana timezone for file naming dates
+  return new Date().toLocaleDateString('en-CA', { timeZone: 'Africa/Accra' });
 }
 
 
@@ -416,7 +417,7 @@ async function renderAudit() {
               : (logs||[]).map(log => `
                 <tr>
                   <td style="font-family:monospace;font-size:11px;color:var(--gray-400);white-space:nowrap">
-                    ${new Date(log.created_at).toLocaleString('en-GB')}
+                    ${formatDateTime(log.created_at)}
                   </td>
                   <td style="font-size:13px;font-weight:600;color:var(--navy)">${escHtml(log.user_name||'System')}</td>
                   <td style="font-size:11px;color:var(--gray-400)">${escHtml(log.user_role||'—')}</td>
