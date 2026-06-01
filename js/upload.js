@@ -552,7 +552,6 @@ async function importBatch() {
     if (iErr) throw iErr;
 
     // 4. Create qualified_students rows ONLY for the newly inserted IDs
-    //    This prevents touching any previously existing student records
     if (insertedStudents && insertedStudents.length > 0) {
       const { error: qErr } = await db
         .from('qualified_students')
@@ -561,6 +560,48 @@ async function importBatch() {
           qualification_status: 'Pending',
         })));
       if (qErr && !qErr.message.includes('duplicate')) throw qErr;
+    }
+
+    // 5. Insert duplicate records WITH duplicate_flag=true so they appear
+    //    in the Duplicate Review page for the admin to resolve
+    const dupRows = parsedRows
+      .filter((r, idx) =>
+        r.student_index_number &&
+        r.full_name &&
+        v.dups.includes(r.student_index_number) &&
+        !v.alreadyIssued.includes(r.student_index_number) &&
+        !v.errors.find(e => e.row === idx + 2)
+      )
+      .map(r => ({
+        student_index_number: r.student_index_number,
+        full_name:            r.full_name,
+        programme:            r.programme,
+        department:           r.department,
+        faculty:              r.faculty,
+        level:                r.level,
+        thesis_status:        r.thesis_status || 'Pending',
+        graduation_year:      r.graduation_year,
+        graduation_batch:     batchName,
+        email:                r.email  || null,
+        phone:                r.phone  || null,
+        uploaded_batch_id:    batch.id,
+        duplicate_flag:       true,   // ← flagged for Duplicate Review
+      }));
+
+    if (dupRows.length > 0) {
+      const { data: dupInserted, error: dErr } = await db
+        .from('students')
+        .insert(dupRows)
+        .select('id');
+      // Ignore unique constraint errors for dups that truly already exist
+      if (dErr && !dErr.message.includes('duplicate key')) throw dErr;
+
+      // Also queue them in qualified_students as Pending
+      if (dupInserted && dupInserted.length > 0) {
+        await db.from('qualified_students').insert(
+          dupInserted.map(s => ({ student_id: s.id, qualification_status: 'Pending' }))
+        );
+      }
     }
 
     await logAudit(
