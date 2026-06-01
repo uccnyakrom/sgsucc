@@ -414,14 +414,14 @@ function readFile(file) {
       // Normalise + map column aliases
       parsedRows = rows.map(r => ({
         student_index_number: String(r.student_index_number || r['Index Number'] || r['Index No'] || r['IndexNo'] || '').trim(),
-        full_name:            String(r.full_name            || r['Full Name']    || r['Name']    || '').trim(),
-        programme:            String(r.programme            || r['Programme']    || r['Program'] || '').trim(),
-        department:           String(r.department           || r['Department']   || '').trim(),
-        faculty:              String(r.faculty              || r['Faculty']      || '').trim(),
+        full_name:            smartCase(String(r.full_name            || r['Full Name']    || r['Name']    || '').trim()),
+        programme:            smartCase(String(r.programme            || r['Programme']    || r['Program'] || '').trim()),
+        department:           smartCase(String(r.department           || r['Department']   || '').trim()),
+        faculty:              smartCase(String(r.faculty              || r['Faculty']      || '').trim()),
         level:                String(r.level                || r['Level']        || '').trim(),
         thesis_status:        String(r.thesis_status        || r['Thesis Status']|| r['Thesis']  || 'Pending').trim(),
         graduation_year:      parseInt(r.graduation_year   || r['Graduation Year'] || r['Year']  || 0),
-        email:                String(r.email               || r['Email']        || '').trim(),
+        email:                String(r.email               || r['Email']        || '').trim().toLowerCase(),
         phone:                String(r.phone               || r['Phone']        || '').trim(),
       }));
 
