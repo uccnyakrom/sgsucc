@@ -591,6 +591,13 @@ async function editStudent(id) {
     return;
   }
 
+  // Safely format effective_date for the date input (must be YYYY-MM-DD)
+  let effDateVal = '';
+  if (s.effective_date) {
+    // Handle both 'YYYY-MM-DD' and full ISO strings
+    effDateVal = String(s.effective_date).split('T')[0];
+  }
+
   openModal(`
     <div class="modal-head">
       <h3>✏️ Edit Student Record</h3>
@@ -598,46 +605,92 @@ async function editStudent(id) {
     </div>
     <div class="modal-body">
 
-      <!-- Identity — read-only -->
-      <div style="padding:12px 14px;background:var(--gray-50);border-radius:10px;
-           margin-bottom:18px;display:flex;align-items:center;gap:12px">
-        <div style="font-size:22px">🎓</div>
+      <!-- Identity strip -->
+      <div style="padding:12px 16px;background:linear-gradient(135deg,var(--navy),var(--navy-mid));
+           border-radius:10px;margin-bottom:18px;display:flex;align-items:center;gap:12px">
+        <div style="font-size:24px">🎓</div>
         <div>
-          <div style="font-size:15px;font-weight:800;color:var(--navy)">${escHtml(s.full_name)}</div>
-          <div style="font-size:12px;color:var(--gray-400);font-family:monospace">${escHtml(s.student_index_number)}</div>
+          <div style="font-size:14px;font-weight:800;color:#fff">${escHtml(s.full_name)}</div>
+          <div style="font-size:11px;color:rgba(200,146,42,0.9);font-family:monospace">${escHtml(s.student_index_number)}</div>
         </div>
-        <div style="margin-left:auto;font-size:11px;color:var(--gray-400);text-align:right">
-          Index and name are read-only.<br>Contact IT to change these.
+        <div style="margin-left:auto;font-size:11px;color:rgba(255,255,255,0.5);text-align:right">
+          Super Admin edit mode
         </div>
       </div>
 
       <div id="edit-stu-alert" style="display:none"></div>
 
-      <!-- Row 1: Programme -->
+      <!-- SECTION: Personal Details -->
+      <div style="font-size:11px;font-weight:700;color:var(--gray-400);letter-spacing:1px;
+           text-transform:uppercase;margin-bottom:10px;padding-bottom:6px;
+           border-bottom:1px solid var(--gray-200)">Personal Details</div>
+
+      <!-- Row 1: Full Name + Index Number -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+        <div class="form-group" style="margin:0">
+          <label>Full Name <span style="color:var(--danger)">*</span>
+            <span style="font-weight:400;font-size:11px;color:var(--gray-400)">— as it should appear on certificate</span>
+          </label>
+          <input type="text" id="edit-fullname" class="form-control"
+            value="${escHtml(s.full_name||'')}"
+            placeholder="e.g. Kwame Asante Mensah">
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>Index Number
+            <span style="font-weight:400;font-size:11px;color:var(--gray-400)">— read-only</span>
+          </label>
+          <input type="text" class="form-control"
+            value="${escHtml(s.student_index_number||'')}" readonly
+            style="background:var(--gray-50);color:var(--gray-400);cursor:not-allowed">
+        </div>
+      </div>
+
+      <!-- Row 2: Email + Phone -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">
+        <div class="form-group" style="margin:0">
+          <label>Email Address</label>
+          <input type="email" id="edit-email" class="form-control"
+            value="${escHtml(s.email||'')}" placeholder="student@ucc.edu.gh">
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>Phone Number</label>
+          <input type="tel" id="edit-phone" class="form-control"
+            value="${escHtml(s.phone||'')}" placeholder="e.g. 0244000000">
+        </div>
+      </div>
+
+      <!-- SECTION: Academic Details -->
+      <div style="font-size:11px;font-weight:700;color:var(--gray-400);letter-spacing:1px;
+           text-transform:uppercase;margin-bottom:10px;padding-bottom:6px;
+           border-bottom:1px solid var(--gray-200)">Academic Details</div>
+
+      <!-- Row 3: Programme (full width) -->
       <div class="form-group" style="margin-bottom:14px">
-        <label>Programme <span style="color:var(--danger)">*</span></label>
+        <label>Programme <span style="color:var(--danger)">*</span>
+          <span style="font-weight:400;font-size:11px;color:var(--gray-400)">— full degree name as on certificate</span>
+        </label>
         <input type="text" id="edit-programme" class="form-control"
           value="${escHtml(s.programme||'')}"
           placeholder="e.g. Master of Philosophy (English Language)">
       </div>
 
-      <!-- Row 2: Faculty + Department -->
+      <!-- Row 4: Faculty + Department -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
         <div class="form-group" style="margin:0">
           <label>Faculty / School <span style="color:var(--danger)">*</span></label>
           ${datalistField('edit-faculty','dl-faculty-edit',
             s.faculty||'', 'e.g. Faculty of Arts', true)}
-          <small style="color:var(--gray-400)">Type freely — existing faculties appear as suggestions</small>
+          <small style="color:var(--gray-400)">Type — existing names appear as hints</small>
         </div>
         <div class="form-group" style="margin:0">
           <label>Department <span style="color:var(--danger)">*</span></label>
           ${datalistField('edit-department','dl-department-edit',
             s.department||'', 'e.g. English', true)}
-          <small style="color:var(--gray-400)">Type freely — existing departments appear as suggestions</small>
+          <small style="color:var(--gray-400)">Type — existing names appear as hints</small>
         </div>
       </div>
 
-      <!-- Row 3: Level + Thesis Status -->
+      <!-- Row 5: Level + Thesis Status -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
         <div class="form-group" style="margin:0">
           <label>Level <span style="color:var(--danger)">*</span></label>
@@ -657,48 +710,43 @@ async function editStudent(id) {
         </div>
       </div>
 
-      <!-- Row 4: Graduation Year + Effective Date -->
+      <!-- SECTION: Graduation Details -->
+      <div style="font-size:11px;font-weight:700;color:var(--gray-400);letter-spacing:1px;
+           text-transform:uppercase;margin-bottom:10px;padding-bottom:6px;
+           border-bottom:1px solid var(--gray-200)">Graduation Details</div>
+
+      <!-- Row 6: Graduation Year + Effective Date -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
         <div class="form-group" style="margin:0">
           <label>Graduation Year <span style="color:var(--danger)">*</span></label>
           <input type="number" id="edit-year" class="form-control"
-            value="${s.graduation_year||''}" min="2000" max="2099">
+            value="${s.graduation_year||new Date().getFullYear()}"
+            min="2000" max="2099">
         </div>
         <div class="form-group" style="margin:0">
-          <label>Effective Date</label>
+          <label>Effective Date <span style="color:var(--danger)">*</span>
+            <span style="font-weight:400;font-size:11px;color:var(--gray-400)">— date qualification took effect</span>
+          </label>
           <input type="date" id="edit-effdate" class="form-control"
-            value="${s.effective_date||''}">
+            value="${effDateVal}">
+          <small style="color:var(--gray-400)">e.g. 31 March 2024 = select 2024-03-31</small>
         </div>
       </div>
 
-      <!-- Row 5: Email + Phone -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
-        <div class="form-group" style="margin:0">
-          <label>Email Address</label>
-          <input type="email" id="edit-email" class="form-control"
-            value="${escHtml(s.email||'')}" placeholder="student@ucc.edu.gh">
-        </div>
-        <div class="form-group" style="margin:0">
-          <label>Phone Number</label>
-          <input type="tel" id="edit-phone" class="form-control"
-            value="${escHtml(s.phone||'')}" placeholder="0244000000">
-        </div>
-      </div>
-
-      <!-- Batch Name (editable) -->
-      <div class="form-group">
+      <!-- Row 7: Batch Name -->
+      <div class="form-group" style="margin-bottom:14px">
         <label>Batch Name</label>
         <input type="text" id="edit-batch" class="form-control"
           value="${escHtml(s.graduation_batch||'')}">
         <small style="color:var(--gray-400)">Only change if this record was assigned to the wrong batch.</small>
       </div>
 
-      <!-- Audit note -->
-      <div class="alert alert-warning" style="margin-top:12px">
+      <!-- Audit notice -->
+      <div class="alert alert-warning" style="margin-top:4px">
         <span>⚠️</span>
         <div style="font-size:13px">
-          All changes are logged in the audit trail with your name and timestamp.
-          Only edit records when there is a verified reason to do so.
+          All changes are permanently logged in the audit trail with your name and timestamp.
+          Only edit when there is a verified reason to do so.
         </div>
       </div>
 
@@ -707,7 +755,7 @@ async function editStudent(id) {
       <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
       <button class="btn btn-gold" onclick="submitEditStudent('${id}')">💾 Save Changes</button>
     </div>
-  `, '660px');
+  `, '680px');
 }
 
 async function submitEditStudent(id) {
@@ -722,9 +770,10 @@ async function submitEditStudent(id) {
   const s = allStudents.find(x => x.id === id);
 
   // Collect new values
+  const fullname   = document.getElementById('edit-fullname')?.value.trim();
   const programme  = document.getElementById('edit-programme')?.value.trim();
-  const faculty    = document.getElementById('edit-faculty')?.value;
-  const department = document.getElementById('edit-department')?.value;
+  const faculty    = document.getElementById('edit-faculty')?.value.trim();
+  const department = document.getElementById('edit-department')?.value.trim();
   const level      = document.getElementById('edit-level')?.value;
   const thesis     = document.getElementById('edit-thesis')?.value;
   const year       = parseInt(document.getElementById('edit-year')?.value);
@@ -733,24 +782,34 @@ async function submitEditStudent(id) {
   const phone      = document.getElementById('edit-phone')?.value.trim();
   const batch      = document.getElementById('edit-batch')?.value.trim();
 
-  // Validate
+  // Validate required fields
+  if (!fullname)   { showAlert('Full name cannot be empty.', 'warning'); return; }
   if (!programme)  { showAlert('Programme cannot be empty.', 'warning'); return; }
   if (!faculty)    { showAlert('Please enter the Faculty / School name.', 'warning'); return; }
   if (!department) { showAlert('Please enter the Department name.', 'warning'); return; }
-  if (!year || year < 2000 || year > 2099) { showAlert('Please enter a valid graduation year.', 'warning'); return; }
+  if (!level)      { showAlert('Please select a level.', 'warning'); return; }
+  if (!effdate)    { showAlert('Please enter the effective date.', 'warning'); return; }
+  if (!year || year < 2000 || year > 2099) {
+    showAlert('Please enter a valid graduation year (e.g. 2024).', 'warning'); return;
+  }
 
-  // Apply smart casing to programme
+  // Apply smart casing
+  const safeName = typeof smartCase === 'function' ? smartCase(fullname) : fullname;
   const safeProg = typeof smartCase === 'function' ? smartCase(programme) : programme;
 
-  // Build update object — track what changed for audit log
+  // Normalise effective_date from existing record for comparison
+  const existingEffDate = s.effective_date ? String(s.effective_date).split('T')[0] : '';
+
+  // Build change log
   const changes = [];
+  if (safeName   !== s.full_name)        changes.push(`Name: "${s.full_name}" → "${safeName}"`);
   if (safeProg   !== s.programme)        changes.push(`Programme: "${s.programme}" → "${safeProg}"`);
   if (faculty    !== s.faculty)          changes.push(`Faculty: "${s.faculty}" → "${faculty}"`);
   if (department !== s.department)       changes.push(`Department: "${s.department}" → "${department}"`);
   if (level      !== s.level)            changes.push(`Level: "${s.level}" → "${level}"`);
   if (thesis     !== s.thesis_status)    changes.push(`Thesis: "${s.thesis_status}" → "${thesis}"`);
   if (year       !== s.graduation_year)  changes.push(`Year: ${s.graduation_year} → ${year}`);
-  if ((effdate||'') !== (s.effective_date||'')) changes.push(`Effective Date: "${s.effective_date||'—'}" → "${effdate||'—'}"`);
+  if ((effdate||'') !== existingEffDate) changes.push(`Effective Date: "${existingEffDate||'—'}" → "${effdate||'—'}"`);
   if ((email||'')   !== (s.email||''))   changes.push(`Email updated`);
   if ((phone||'')   !== (s.phone||''))   changes.push(`Phone updated`);
   if ((batch||'')   !== (s.graduation_batch||'')) changes.push(`Batch: "${s.graduation_batch}" → "${batch}"`);
@@ -768,16 +827,17 @@ async function submitEditStudent(id) {
   const { error } = await db
     .from('students')
     .update({
-      programme:       safeProg,
+      full_name:        safeName,
+      programme:        safeProg,
       faculty,
       department,
       level,
-      thesis_status:   thesis,
-      graduation_year: year,
-      effective_date:  effdate || null,
-      email:           email   || null,
-      phone:           phone   || null,
-      graduation_batch: batch  || s.graduation_batch,
+      thesis_status:    thesis,
+      graduation_year:  year,
+      effective_date:   effdate   || null,
+      email:            email     || null,
+      phone:            phone     || null,
+      graduation_batch: batch     || s.graduation_batch,
     })
     .eq('id', id);
 
