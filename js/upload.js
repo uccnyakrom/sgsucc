@@ -66,7 +66,7 @@ function renderUploadStep() {
               </div>
               <div class="form-group" style="margin-top:14px">
                 <label>Academic Year</label>
-                <input type="text" id="batch-year" class="form-control" value="2024/2025">
+                <input type="text" id="batch-year" class="form-control" value="2025/2026">
               </div>
             </div>
           </div>
@@ -546,7 +546,7 @@ function normaliseName(name) {
 
 async function importBatch() {
   const batchName = document.getElementById('batch-name')?.value.trim() || 'Unknown';
-  const year      = document.getElementById('batch-year')?.value.trim() || '2024/2025';
+  const year      = document.getElementById('batch-year')?.value.trim() || '2025/2026';
   const v         = validationResult;
   if (!v || v.valid === 0) { showToast('No valid records to import.', 'warning'); return; }
 
