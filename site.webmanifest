@@ -1,0 +1,23 @@
+{
+  "name": "UCC Graduate Clearance Portal",
+  "short_name": "UCC SGS",
+  "description": "University of Cape Coast — School of Graduate Studies Certificate Clearance Portal",
+  "start_url": "/sgsucc/",
+  "display": "standalone",
+  "background_color": "#002147",
+  "theme_color": "#002147",
+  "icons": [
+    {
+      "src": "favicon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "favicon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
