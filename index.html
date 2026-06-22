@@ -4,116 +4,417 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 
-  <!-- ═══════════════════════════════════════════════════
-       UCC FAVICONS & BROWSER TAB
-       ═══════════════════════════════════════════════ -->
-
-  <!-- Primary favicon — browser tab -->
-  <link rel="icon" type="image/x-icon"            href="favicon.ico">
-  <link rel="icon" type="image/png" sizes="16x16"  href="favicon-16x16.png">
-  <link rel="icon" type="image/png" sizes="32x32"  href="favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="96x96"  href="favicon-96x96.png">
-
-  <!-- Apple touch icon (iPhone / iPad home screen) -->
-  <link rel="apple-touch-icon" sizes="180x180"     href="favicon-180x180.png">
-
-  <!-- Android / PWA icons -->
+  <!-- ── Favicons ─────────────────────────────────────────────── -->
+  <link rel="icon" type="image/x-icon"              href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16"   href="favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32"   href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="96x96"   href="favicon-96x96.png">
+  <link rel="apple-touch-icon"      sizes="180x180" href="favicon-180x180.png">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192x192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="favicon-512x512.png">
-
-  <!-- Web App Manifest -->
   <link rel="manifest" href="site.webmanifest">
-
-  <!-- Browser / address bar colour (UCC Navy) -->
-  <meta name="theme-color"            content="#002147">
+  <meta name="theme-color"             content="#002147">
   <meta name="msapplication-TileColor" content="#002147">
   <meta name="msapplication-TileImage" content="favicon-192x192.png">
   <meta name="msapplication-config"    content="none">
 
-  <!-- ═══════════════════════════════════════════════════
-       PAGE META
-       ═══════════════════════════════════════════════ -->
+  <!-- ── Meta ─────────────────────────────────────────────────── -->
   <title>UCC Graduate Clearance Portal</title>
-  <meta name="description"       content="University of Cape Coast — Graduate Clearance &amp; Certificate Issuance Portal">
-  <meta name="application-name"  content="UCC SGS Portal">
+  <meta name="description"      content="University of Cape Coast — Graduate Clearance &amp; Certificate Issuance Portal">
+  <meta name="application-name" content="UCC SGS Portal">
 
-  <!-- ═══════════════════════════════════════════════════
-       FONTS & STYLES
-       ═══════════════════════════════════════════════ -->
+  <!-- ── Fonts ────────────────────────────────────────────────── -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 
-  <!-- ═══════════════════════════════════════════════════
-       THIRD-PARTY SCRIPTS
-       ═══════════════════════════════════════════════ -->
+  <!-- ── CDN Scripts ──────────────────────────────────────────── -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <!-- jsPDF for PDF report export -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 
   <style>
-    code { font-family:'Courier New',monospace; background:var(--gray-100); padding:2px 6px; border-radius:4px; font-size:12px; }
+    /* ── App utility classes ──────────────────────────────────── */
+    code { font-family:'Courier New',monospace; background:var(--gray-100);
+           padding:2px 6px; border-radius:4px; font-size:12px; }
     #app { display:none; }
     .flex { display:flex; }
     .flex-col { flex-direction:column; }
     .h-full { height:100%; }
     .overflow-hidden { overflow:hidden; }
+
+    /* ── Landing page base ────────────────────────────────────── */
+    *, *::before, *::after { box-sizing:border-box; }
+
+    #login-page {
+      min-height: 100vh;
+      display: flex;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: #f0f4f8;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       LEFT PANEL — branding
+       ════════════════════════════════════════════════════════ */
+    .lp-left {
+      flex: 1;
+      background: linear-gradient(160deg, #001228 0%, #002147 50%, #002e60 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 48px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Decorative rings */
+    .lp-left::before {
+      content: '';
+      position: absolute;
+      width: 700px; height: 700px; border-radius: 50%;
+      border: 1px solid rgba(200,146,42,0.10);
+      top: -220px; left: -220px; pointer-events: none;
+    }
+    .lp-left::after {
+      content: '';
+      position: absolute;
+      width: 500px; height: 500px; border-radius: 50%;
+      border: 1px solid rgba(200,146,42,0.07);
+      bottom: -160px; right: -160px; pointer-events: none;
+    }
+
+    /* Top gold stripe */
+    .lp-stripe {
+      position: absolute; top: 0; left: 0; right: 0; height: 4px;
+      background: linear-gradient(90deg, #C8922A 0%, #E8B84B 50%, #C8922A 100%);
+    }
+
+    /* Coat of arms */
+    .lp-logo-wrap {
+      position: relative; margin-bottom: 28px;
+      animation: lpFadeDown 0.8s ease both;
+    }
+    .lp-logo {
+      width: 128px; height: 128px; border-radius: 50%;
+      background: #ffffff;
+      padding: 10px;
+      display: block;
+      box-shadow:
+        0 0 0 6px rgba(200,146,42,0.3),
+        0 0 0 14px rgba(200,146,42,0.10),
+        0 24px 64px rgba(0,0,0,0.45);
+    }
+
+    .lp-institution {
+      font-size: 12px; font-weight: 700; letter-spacing: 3px;
+      text-transform: uppercase; color: #C8922A;
+      text-align: center; margin-bottom: 14px;
+      animation: lpFadeDown 0.8s 0.1s ease both;
+    }
+    .lp-portal-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 38px; font-weight: 800; color: #ffffff;
+      text-align: center; line-height: 1.2; margin-bottom: 8px;
+      animation: lpFadeDown 0.8s 0.2s ease both;
+    }
+    .lp-school {
+      font-size: 14px; color: rgba(255,255,255,0.55);
+      text-align: center; margin-bottom: 48px;
+      animation: lpFadeDown 0.8s 0.3s ease both;
+    }
+
+    /* Feature list */
+    .lp-features {
+      display: flex; flex-direction: column; gap: 12px;
+      width: 100%; max-width: 360px;
+      animation: lpFadeDown 0.8s 0.4s ease both;
+    }
+    .lp-feat {
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 14px 16px;
+      background: rgba(255,255,255,0.055);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-left: 3px solid #C8922A;
+      border-radius: 10px;
+      transition: background 0.2s;
+    }
+    .lp-feat:hover { background: rgba(255,255,255,0.09); }
+    .lp-feat-icon { font-size: 18px; flex-shrink: 0; margin-top: 2px; }
+    .lp-feat-body strong {
+      display: block; font-size: 13px; font-weight: 700;
+      color: #fff; margin-bottom: 2px;
+    }
+    .lp-feat-body span {
+      font-size: 12px; color: rgba(255,255,255,0.45); line-height: 1.45;
+    }
+
+    .lp-left-foot {
+      position: absolute; bottom: 20px;
+      font-size: 11px; color: rgba(255,255,255,0.22);
+      text-align: center; letter-spacing: 0.5px;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       RIGHT PANEL — sign-in form
+       ════════════════════════════════════════════════════════ */
+    .lp-right {
+      width: 460px; flex-shrink: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 52px 44px;
+      background: #ffffff;
+      box-shadow: -6px 0 48px rgba(0,0,0,0.10);
+      animation: lpFadeLeft 0.7s 0.15s ease both;
+    }
+
+    .lp-form-wrap { width: 100%; }
+
+    .lp-eyebrow {
+      font-size: 11px; font-weight: 700; letter-spacing: 2.5px;
+      text-transform: uppercase; color: #C8922A; margin-bottom: 8px;
+    }
+    .lp-form-heading {
+      font-family: 'Playfair Display', serif;
+      font-size: 30px; font-weight: 800; color: #002147;
+      margin-bottom: 6px; line-height: 1.2;
+    }
+    .lp-form-desc {
+      font-size: 13px; color: #64748B; line-height: 1.55; margin-bottom: 32px;
+    }
+
+    /* Divider */
+    .lp-divider {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 28px;
+    }
+    .lp-divider-line { flex: 1; height: 1px; background: #E2E8F0; }
+    .lp-divider-text { font-size: 11px; color: #94A3B8; white-space: nowrap; }
+
+    /* Input fields */
+    .lp-field { margin-bottom: 20px; }
+    .lp-field label {
+      display: block; font-size: 13px; font-weight: 600;
+      color: #1E293B; margin-bottom: 7px;
+    }
+    .lp-field-inner {
+      position: relative;
+    }
+    .lp-field-icon {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      font-size: 15px; pointer-events: none; opacity: 0.5;
+    }
+    .lp-field input {
+      width: 100%; padding: 12px 16px 12px 40px;
+      border: 1.5px solid #E2E8F0; border-radius: 10px;
+      font-size: 14px; font-family: 'DM Sans', sans-serif;
+      color: #1E293B; background: #F8FAFC; outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    }
+    .lp-field input:focus {
+      border-color: #C8922A; background: #fff;
+      box-shadow: 0 0 0 3px rgba(200,146,42,0.13);
+    }
+    .lp-field input::placeholder { color: #94A3B8; }
+
+    /* Error */
+    #login-error {
+      display: none; width: 100%;
+      padding: 10px 14px; margin-bottom: 16px;
+      background: #FEF2F2; border: 1px solid #FECACA;
+      border-radius: 8px; font-size: 13px; color: #DC2626; line-height: 1.4;
+    }
+
+    /* Sign in button */
+    #login-btn {
+      width: 100%; padding: 14px 20px;
+      background: linear-gradient(135deg, #001a38 0%, #002147 50%, #003068 100%);
+      color: #fff; font-family: 'DM Sans', sans-serif;
+      font-size: 15px; font-weight: 700; letter-spacing: 0.3px;
+      border: none; border-radius: 10px; cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 4px 18px rgba(0,33,71,0.30);
+      position: relative; overflow: hidden;
+    }
+    #login-btn::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(200,146,42,0.15), transparent);
+      opacity: 0; transition: opacity 0.2s;
+    }
+    #login-btn:hover:not(:disabled)::after { opacity: 1; }
+    #login-btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 24px rgba(0,33,71,0.38);
+    }
+    #login-btn:active { transform: translateY(0); }
+    #login-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    /* Gold accent bar under button */
+    .lp-gold-bar {
+      width: 48px; height: 3px; margin: 18px auto 0;
+      background: linear-gradient(90deg, #C8922A, #E8B84B, #C8922A);
+      border-radius: 99px;
+    }
+
+    /* Secure note */
+    .lp-secure {
+      margin-top: 24px;
+      padding: 12px 16px;
+      background: #F8FAFC; border: 1px solid #E2E8F0;
+      border-radius: 10px; font-size: 12px; color: #64748B;
+      text-align: center; line-height: 1.55;
+    }
+
+    /* Footer text */
+    .lp-right-foot {
+      margin-top: 36px;
+      font-size: 11px; color: #94A3B8;
+      text-align: center; line-height: 1.9;
+    }
+
+    /* ── Animations ─────────────────────────────────────────── */
+    @keyframes lpFadeDown {
+      from { opacity: 0; transform: translateY(-18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes lpFadeLeft {
+      from { opacity: 0; transform: translateX(18px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    /* ── Mobile ─────────────────────────────────────────────── */
+    @media (max-width: 860px) {
+      #login-page { flex-direction: column; }
+      .lp-left {
+        padding: 40px 24px 32px;
+        min-height: auto;
+      }
+      .lp-portal-title { font-size: 26px; }
+      .lp-logo { width: 90px; height: 90px; }
+      .lp-features { display: none; }
+      .lp-right { width: 100%; padding: 36px 24px 44px; box-shadow: none; }
+    }
   </style>
 </head>
 <body>
 
 <!-- ============================================================
-     LOGIN PAGE
+     LANDING / LOGIN PAGE
      ============================================================ -->
-<div id="login-page" style="display:flex">
-  <div class="login-card">
-    <div class="login-header">
-      <!-- UCC Coat of Arms on landing page -->
+<div id="login-page">
+
+  <!-- LEFT — Branding -->
+  <div class="lp-left">
+    <div class="lp-stripe"></div>
+
+    <div class="lp-logo-wrap">
       <img src="favicon-180x180.png"
            alt="University of Cape Coast Coat of Arms"
-           style="width:80px;height:80px;object-fit:contain;margin-bottom:8px;
-                  border-radius:50%;background:#fff;padding:6px;
-                  box-shadow:0 2px 12px rgba(0,33,71,0.18)">
-      <div class="login-label">University of Cape Coast</div>
-      <h1 class="login-title">Graduate Clearance Portal</h1>
-      <p class="login-sub">School of Graduate Studies</p>
+           class="lp-logo">
     </div>
-    <div class="login-box">
-      <h2>Sign In to Your Account</h2>
-      <form onsubmit="handleLogin(event)">
-        <div class="form-group">
-          <label for="login-email">Institutional Email</label>
-          <input type="email" id="login-email" class="form-control"
-            placeholder="username@ucc.edu.gh" required autocomplete="email">
+
+    <div class="lp-institution">University of Cape Coast</div>
+
+    <h1 class="lp-portal-title">Graduate Clearance<br>&amp; Certificate Portal</h1>
+    <p class="lp-school">School of Graduate Studies</p>
+
+    <div class="lp-features">
+      <div class="lp-feat">
+        <div class="lp-feat-icon">🔍</div>
+        <div class="lp-feat-body">
+          <strong>Automatic Duplicate Detection</strong>
+          <span>Flags duplicate names and index numbers before any record is imported</span>
         </div>
-        <div class="form-group">
-          <label for="login-password">Password</label>
-          <input type="password" id="login-password" class="form-control"
-            placeholder="Enter your password" required autocomplete="current-password">
+      </div>
+      <div class="lp-feat">
+        <div class="lp-feat-icon">✅</div>
+        <div class="lp-feat-body">
+          <strong>Structured Approval Workflow</strong>
+          <span>Upload → Verify → Approve → Issue — every step role-gated and logged</span>
         </div>
-        <div id="login-error" class="login-error"></div>
-        <button type="submit" id="login-btn" class="btn-login">
-          🔐 Sign In Securely
-        </button>
-      </form>
-      <div style="margin-top:16px;padding:12px 14px;background:var(--gray-100);border-radius:10px;
-           font-size:12px;color:var(--gray-600);text-align:center">
-        🔒 Secure access for authorised University staff only.
+      </div>
+      <div class="lp-feat">
+        <div class="lp-feat-icon">🏅</div>
+        <div class="lp-feat-body">
+          <strong>Certificate Issuance Tracking</strong>
+          <span>Unique reference numbers, issuance dates and collection confirmation</span>
+        </div>
+      </div>
+      <div class="lp-feat">
+        <div class="lp-feat-icon">📋</div>
+        <div class="lp-feat-body">
+          <strong>Reports &amp; Permanent Audit Trail</strong>
+          <span>PDF and Excel exports with a tamper-evident activity log</span>
+        </div>
       </div>
     </div>
+
+    <div class="lp-left-foot">Veritas &nbsp;·&nbsp; Nobis &nbsp;·&nbsp; Lumen &nbsp;|&nbsp; UCC © 2025</div>
   </div>
-  <p class="login-footer">University of Cape Coast · School of Graduate Studies · © 2025</p>
-</div>
+
+  <!-- RIGHT — Sign-in form -->
+  <div class="lp-right">
+    <div class="lp-form-wrap">
+
+      <div class="lp-eyebrow">Staff Portal Access</div>
+      <h2 class="lp-form-heading">Sign In to<br>Your Account</h2>
+      <p class="lp-form-desc">
+        Enter your institutional email address and password to access
+        the UCC Graduate Clearance Portal.
+      </p>
+
+      <form onsubmit="handleLogin(event)">
+
+        <div class="lp-field">
+          <label for="login-email">Institutional Email</label>
+          <div class="lp-field-inner">
+            <span class="lp-field-icon">✉️</span>
+            <input type="email" id="login-email"
+              placeholder="username@ucc.edu.gh"
+              required autocomplete="email">
+          </div>
+        </div>
+
+        <div class="lp-field">
+          <label for="login-password">Password</label>
+          <div class="lp-field-inner">
+            <span class="lp-field-icon">🔒</span>
+            <input type="password" id="login-password"
+              placeholder="Enter your password"
+              required autocomplete="current-password">
+          </div>
+        </div>
+
+        <div id="login-error"></div>
+
+        <button type="submit" id="login-btn">
+          🔐 &nbsp; Sign In Securely
+        </button>
+
+        <div class="lp-gold-bar"></div>
+      </form>
+
+      <div class="lp-secure">
+        🔒 &nbsp;Authorised University of Cape Coast staff only.<br>
+        Unauthorised access is prohibited and may be subject to disciplinary action.
+      </div>
+
+      <div class="lp-right-foot">
+        University of Cape Coast &nbsp;·&nbsp; School of Graduate Studies<br>
+        Graduate Clearance &amp; Certificate Portal &nbsp;·&nbsp; © 2025
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /login-page -->
 
 
 <!-- ============================================================
      MAIN APP
      ============================================================ -->
-
-<!-- Mobile overlay — tap to close sidebar -->
 <div id="sidebar-overlay" onclick="closeMobileSidebar()"></div>
 
 <div id="app" class="flex h-full overflow-hidden">
@@ -121,12 +422,10 @@
   <!-- Sidebar -->
   <nav id="sidebar">
     <div class="sidebar-logo">
-      <!-- UCC Coat of Arms in sidebar -->
-      <img src="favicon-48x48.png"
-           alt="UCC"
+      <img src="favicon-48x48.png" alt="UCC"
            class="sidebar-logo-icon"
-           style="width:36px;height:36px;object-fit:contain;border-radius:6px;
-                  background:#fff;padding:3px">
+           style="width:34px;height:34px;object-fit:contain;
+                  border-radius:6px;background:#fff;padding:3px">
       <div class="sidebar-logo-text">
         <div class="brand">UCC</div>
         <div class="tagline">Grad Clearance</div>
@@ -148,10 +447,8 @@
     </div>
   </nav>
 
-  <!-- Main -->
+  <!-- Main content area -->
   <div id="main" class="flex flex-col h-full overflow-hidden" style="flex:1">
-
-    <!-- Topbar -->
     <header id="topbar">
       <div style="display:flex;align-items:center;gap:6px">
         <button id="mobile-menu-btn" onclick="toggleMobileSidebar()">☰</button>
@@ -169,15 +466,12 @@
         </div>
       </div>
     </header>
-
     <main id="page-content"></main>
   </div>
 </div>
 
 
-<!-- ═══════════════════════════════════════════════════
-     PORTAL SCRIPTS
-     ═══════════════════════════════════════════════ -->
+<!-- ── Scripts ────────────────────────────────────────────────── -->
 <script src="js/config.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/router.js"></script>
@@ -190,26 +484,23 @@
 <script src="js/chatbot.js"></script>
 
 <script>
-  // Mobile sidebar functions
   function toggleMobileSidebar() {
     const sb      = document.getElementById('sidebar');
     const overlay = document.getElementById('sidebar-overlay');
-    sb.classList.toggle('mobile-open');
-    overlay.classList.toggle('active');
+    if (sb)      sb.classList.toggle('mobile-open');
+    if (overlay) overlay.classList.toggle('active');
   }
-
   function closeMobileSidebar() {
-    document.getElementById('sidebar').classList.remove('mobile-open');
-    document.getElementById('sidebar-overlay').classList.remove('active');
+    const sb      = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    if (sb)      sb.classList.remove('mobile-open');
+    if (overlay) overlay.classList.remove('active');
   }
-
-  // Close sidebar when a nav item is clicked on mobile
   document.addEventListener('click', function(e) {
     if (e.target.closest('.nav-item') && window.innerWidth <= 768) {
       closeMobileSidebar();
     }
   });
-
   document.addEventListener('DOMContentLoaded', () => { initAuth(); });
 </script>
 
