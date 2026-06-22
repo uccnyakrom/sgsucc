@@ -3,17 +3,57 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <!-- ═══════════════════════════════════════════════════
+       UCC FAVICONS & BROWSER TAB
+       ═══════════════════════════════════════════════ -->
+
+  <!-- Primary favicon — browser tab -->
+  <link rel="icon" type="image/x-icon"            href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16"  href="favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32"  href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="96x96"  href="favicon-96x96.png">
+
+  <!-- Apple touch icon (iPhone / iPad home screen) -->
+  <link rel="apple-touch-icon" sizes="180x180"     href="favicon-180x180.png">
+
+  <!-- Android / PWA icons -->
+  <link rel="icon" type="image/png" sizes="192x192" href="favicon-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="favicon-512x512.png">
+
+  <!-- Web App Manifest -->
+  <link rel="manifest" href="site.webmanifest">
+
+  <!-- Browser / address bar colour (UCC Navy) -->
+  <meta name="theme-color"            content="#002147">
+  <meta name="msapplication-TileColor" content="#002147">
+  <meta name="msapplication-TileImage" content="favicon-192x192.png">
+  <meta name="msapplication-config"    content="none">
+
+  <!-- ═══════════════════════════════════════════════════
+       PAGE META
+       ═══════════════════════════════════════════════ -->
   <title>UCC Graduate Clearance Portal</title>
-  <meta name="description" content="University of Cape Coast — Graduate Clearance & Certificate Issuance Portal">
+  <meta name="description"       content="University of Cape Coast — Graduate Clearance &amp; Certificate Issuance Portal">
+  <meta name="application-name"  content="UCC SGS Portal">
+
+  <!-- ═══════════════════════════════════════════════════
+       FONTS & STYLES
+       ═══════════════════════════════════════════════ -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+
+  <!-- ═══════════════════════════════════════════════════
+       THIRD-PARTY SCRIPTS
+       ═══════════════════════════════════════════════ -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <!-- jsPDF for PDF report export -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
   <style>
     code { font-family:'Courier New',monospace; background:var(--gray-100); padding:2px 6px; border-radius:4px; font-size:12px; }
     #app { display:none; }
@@ -31,7 +71,12 @@
 <div id="login-page" style="display:flex">
   <div class="login-card">
     <div class="login-header">
-      <div class="login-icon">🎓</div>
+      <!-- UCC Coat of Arms on landing page -->
+      <img src="favicon-180x180.png"
+           alt="University of Cape Coast Coat of Arms"
+           style="width:80px;height:80px;object-fit:contain;margin-bottom:8px;
+                  border-radius:50%;background:#fff;padding:6px;
+                  box-shadow:0 2px 12px rgba(0,33,71,0.18)">
       <div class="login-label">University of Cape Coast</div>
       <h1 class="login-title">Graduate Clearance Portal</h1>
       <p class="login-sub">School of Graduate Studies</p>
@@ -76,7 +121,12 @@
   <!-- Sidebar -->
   <nav id="sidebar">
     <div class="sidebar-logo">
-      <div class="sidebar-logo-icon">🎓</div>
+      <!-- UCC Coat of Arms in sidebar -->
+      <img src="favicon-48x48.png"
+           alt="UCC"
+           class="sidebar-logo-icon"
+           style="width:36px;height:36px;object-fit:contain;border-radius:6px;
+                  background:#fff;padding:3px">
       <div class="sidebar-logo-text">
         <div class="brand">UCC</div>
         <div class="tagline">Grad Clearance</div>
@@ -114,7 +164,7 @@
         onclick="openChangePasswordModal(false)" title="Change password">
         <div class="topbar-avatar" id="topbar-avatar">?</div>
         <div>
-          <div class="topbar-name" id="topbar-name">Loading…</div>
+          <div class="topbar-name"  id="topbar-name">Loading…</div>
           <div style="font-size:10px;color:var(--gold);font-weight:600">🔑 Change password</div>
         </div>
       </div>
@@ -125,7 +175,9 @@
 </div>
 
 
-<!-- Scripts -->
+<!-- ═══════════════════════════════════════════════════
+     PORTAL SCRIPTS
+     ═══════════════════════════════════════════════ -->
 <script src="js/config.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/router.js"></script>
@@ -135,6 +187,7 @@
 <script src="js/duplicates.js"></script>
 <script src="js/issuance.js"></script>
 <script src="js/reports.js"></script>
+<script src="js/chatbot.js"></script>
 
 <script>
   // Mobile sidebar functions
