@@ -117,7 +117,8 @@ async function loadUserProfile(authUser) {
       ? (nameParts[0][0] + nameParts[nameParts.length - 1][0]).toUpperCase()
       : nameParts[0].slice(0, 2).toUpperCase();
 
-    const pwChanged = !!localStorage.getItem('pw_changed_' + authUser.id);
+    // Check password_changed from database — works across all browsers and devices
+    const pwChanged = !!profile.password_changed;
 
     window.currentUser = {
       id:          authUser.id,
@@ -378,7 +379,10 @@ async function submitChangePassword() {
     return;
   }
 
-  localStorage.setItem('pw_changed_' + window.currentUser.id, '1');
+  // Save to database so it persists across all browsers and devices
+  await db.from('user_profiles')
+    .update({ password_changed: true })
+    .eq('id', window.currentUser.id);
   window.currentUser.mustChangePw = false;
 
   try {
