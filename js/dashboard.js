@@ -55,7 +55,13 @@ async function renderDashboard() {
         <div class="banner-title">Graduate Clearance Overview</div>
         <div class="banner-sub">Certificate issuance tracking · School of Graduate Studies</div>
       </div>
-      <div class="banner-icon">🎓</div>
+      <div class="banner-icon">
+        <img src="favicon-96x96.png"
+             alt="UCC Coat of Arms"
+             style="width:72px;height:72px;object-fit:contain;
+                    border-radius:50%;background:#fff;padding:6px;
+                    box-shadow:0 4px 16px rgba(0,0,0,0.25)">
+      </div>
     </div>
 
     <!-- Stat cards -->
