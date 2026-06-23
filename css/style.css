@@ -1164,3 +1164,169 @@ input[list]:focus {
   border-color: var(--gold);
   outline: none;
 }
+
+
+/* ════════════════════════════════════════════════════════════════
+   STUDENT TABLE — FOCUSED VISUAL POLISH
+   ════════════════════════════════════════════════════════════════ */
+
+/* Index number — make it look like a proper ID code */
+td:first-child {
+  font-family: 'JetBrains Mono', 'SF Mono', 'Courier New', monospace;
+  font-weight: 700;
+  color: var(--navy);
+  letter-spacing: 0.3px;
+  font-size: 12px;
+  background: linear-gradient(180deg, transparent, rgba(0,33,71,0.015));
+}
+
+/* Student name cell — make name pop, subtitle softer */
+td:nth-child(2) {
+  line-height: 1.4;
+}
+td:nth-child(2) > div:first-child,
+td:nth-child(2) strong {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 2px;
+}
+td:nth-child(2) > div:last-child,
+td:nth-child(2) small {
+  font-size: 11px;
+  color: var(--gray-400);
+  font-weight: 500;
+  letter-spacing: 0.2px;
+}
+
+/* Programme column — slightly tighter */
+td:nth-child(3) {
+  color: var(--gray-700);
+  font-weight: 500;
+  font-size: 12.5px;
+  max-width: 280px;
+}
+
+/* Faculty column — light italic feel */
+td:nth-child(4) {
+  font-size: 12px;
+  color: var(--gray-500);
+  max-width: 180px;
+}
+
+/* Effective date — em-dash should look intentional */
+td:nth-child(5) {
+  font-size: 12px;
+  color: var(--gray-500);
+  font-weight: 500;
+  white-space: nowrap;
+}
+td:nth-child(5):empty::after,
+td:nth-child(5):has(> :only-child:contains('—')) {
+  color: var(--gray-300);
+}
+
+/* "Not Initiated" badges — replace dead grey with softer purple */
+.badge[class*="default"]:not(.badge-approved):not(.badge-pending):not(.badge-verified):not(.badge-rejected):not(.badge-issued):not(.badge-collected) {
+  background: #FAFAFA;
+  color: #94A3B8;
+  border-color: #E2E8F0;
+}
+
+/* Action buttons — improved hierarchy */
+td:last-child {
+  text-align: right;
+}
+td:last-child > * {
+  margin-left: 4px;
+}
+
+/* Make ALL action buttons consistent outlined style */
+td .btn-sm {
+  background: #ffffff !important;
+  border: 1.5px solid #E2E8F0 !important;
+  color: var(--gray-600) !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  font-size: 11.5px !important;
+  padding: 6px 12px !important;
+  border-radius: 7px !important;
+  transition: all 0.15s ease !important;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04) !important;
+}
+
+/* View — neutral hover */
+td .btn-sm:hover {
+  border-color: var(--navy) !important;
+  color: var(--navy) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0,33,71,0.15) !important;
+}
+
+/* Review (gold) — keep gold but make it elegant */
+td .btn-gold.btn-sm {
+  background: linear-gradient(135deg, #C8922A, #D4A03A) !important;
+  border-color: #C8922A !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(200,146,42,0.30) !important;
+}
+td .btn-gold.btn-sm:hover {
+  background: linear-gradient(135deg, #B07F1F, #C8922A) !important;
+  border-color: #B07F1F !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(200,146,42,0.45) !important;
+}
+
+/* Verify — give it a positive green hover */
+td .btn-sm[onclick*="erify"]:hover,
+td .btn-sm[onclick*="erif"]:hover {
+  border-color: #16A34A !important;
+  color: #15803D !important;
+  background: #F0FDF4 !important;
+}
+
+/* Edit — give it amber hover */
+td .btn-sm[onclick*="dit"]:hover {
+  border-color: #C8922A !important;
+  color: #B07F1F !important;
+  background: #FFFBEB !important;
+}
+
+/* Row height — give more breathing room */
+tbody tr td {
+  padding-top: 16px !important;
+  padding-bottom: 16px !important;
+}
+
+/* Better row dividers */
+tbody tr {
+  border-bottom: 1px solid #F1F5F9;
+}
+tbody tr:hover {
+  background: linear-gradient(90deg, #F8FAFF, #F0F7FF) !important;
+  box-shadow: inset 3px 0 0 var(--gold);
+}
+
+/* Header — make it more distinctive */
+thead tr {
+  background: linear-gradient(180deg, #F8FAFC 0%, #EEF2F6 100%) !important;
+  border-bottom: 2px solid #CBD5E1 !important;
+}
+thead th {
+  padding-top: 14px !important;
+  padding-bottom: 14px !important;
+  color: #475569 !important;
+  font-size: 10.5px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.8px !important;
+}
+
+/* Status badge with dot — make pending pulse subtly */
+.badge-pending::before {
+  animation: pulseDot 2s ease-in-out infinite;
+}
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 3px rgba(255,255,255,0.45); }
+  50%      { opacity: 0.7; box-shadow: 0 0 0 4px rgba(180,83,9,0.15); }
+}
