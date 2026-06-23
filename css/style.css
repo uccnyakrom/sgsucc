@@ -264,8 +264,9 @@ input, select, textarea { font-family: inherit; }
 #sidebar.collapsed .nav-label { display: none; }
 
 .sidebar-user {
-  padding: 12px 10px;
-  border-top: 1px solid rgba(255,255,255,0.07);
+  padding: 14px 12px 16px;
+  border-top: 1px solid rgba(255,255,255,0.12);
+  background: rgba(0,0,0,0.15);
 }
 .user-card {
   display: flex;
@@ -273,22 +274,70 @@ input, select, textarea { font-family: inherit; }
   gap: 10px;
   padding: 10px 12px;
   border-radius: 10px;
-  background: rgba(255,255,255,0.05);
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.10);
 }
 .user-avatar {
-  width: 34px; height: 34px;
+  width: 36px; height: 36px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--gold), var(--gold-light));
   display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 800; color: #fff;
+  font-size: 13px; font-weight: 800; color: #fff;
   flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 .user-info { flex: 1; min-width: 0; overflow: hidden; }
-.user-name { color: #fff; font-size: 12px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.user-role { color: rgba(255,255,255,0.35); font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.btn-logout { background: none; border: none; color: rgba(255,255,255,0.35); font-size: 15px; padding: 4px; border-radius: 6px; transition: color 0.2s; }
-.btn-logout:hover { color: var(--danger); }
-#sidebar.collapsed .user-info, #sidebar.collapsed .btn-logout { display: none; }
+.user-name {
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  letter-spacing: 0.1px;
+}
+.user-role {
+  color: rgba(200,146,42,0.85);
+  font-size: 10px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-top: 1px;
+}
+
+/* Change password + logout buttons */
+.btn-logout {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.14);
+  color: rgba(255,255,255,0.80);
+  font-size: 15px;
+  padding: 6px 7px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.btn-logout:hover {
+  background: rgba(255,255,255,0.16);
+  border-color: rgba(255,255,255,0.25);
+  color: #ffffff;
+}
+.btn-logout:last-child:hover {
+  background: rgba(220,38,38,0.20);
+  border-color: rgba(220,38,38,0.40);
+  color: #FCA5A5;
+}
+
+/* Tooltip labels under buttons */
+.sidebar-user .btn-logout[title]::after {
+  display: none;
+}
+
+/* Collapsed state */
+#sidebar.collapsed .user-info,
+#sidebar.collapsed .btn-logout { display: none; }
 
 /* ---- Main area ---- */
 #main {
