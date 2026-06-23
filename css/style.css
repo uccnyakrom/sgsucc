@@ -404,26 +404,36 @@ input, select, textarea { font-family: inherit; }
 
 /* ---- Buttons ---- */
 /* ════════════════════════════════════════════════════════
-   STATUS BADGES
+   STATUS BADGES — modern pill style with dot indicator
    ════════════════════════════════════════════════════ */
 .badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 3px 10px;
+  gap: 6px;
+  padding: 5px 12px 5px 10px;
   border-radius: 20px;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.3px;
   white-space: nowrap;
+  line-height: 1.2;
+  border: 1px solid transparent;
 }
-.badge-approved { background: #DCFCE7; color: #166534; }
-.badge-pending  { background: #FEF9C3; color: #854D0E; }
-.badge-verified { background: #DBEAFE; color: #1E40AF; }
-.badge-rejected { background: #FEE2E2; color: #991B1B; }
-.badge-issued   { background: #F3E8FF; color: #6B21A8; }
-.badge-collected{ background: #F0FDF4; color: #166534; }
-.badge-default  { background: #F1F5F9; color: #475569; }
+.badge::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: currentColor;
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.45);
+}
+.badge-approved  { background: #DCFCE7; color: #16803D; border-color: #BBF7D0; }
+.badge-pending   { background: #FEF3C7; color: #B45309; border-color: #FDE68A; }
+.badge-verified  { background: #DBEAFE; color: #1D4ED8; border-color: #BFDBFE; }
+.badge-rejected  { background: #FEE2E2; color: #B91C1C; border-color: #FECACA; }
+.badge-issued    { background: #F3E8FF; color: #7E22CE; border-color: #E9D5FF; }
+.badge-collected { background: #DCFCE7; color: #15803D; border-color: #86EFAC; }
+.badge-default   { background: #F1F5F9; color: #475569; border-color: #E2E8F0; }
 
 /* ════════════════════════════════════════════════════════
    BUTTONS
@@ -446,7 +456,59 @@ input, select, textarea { font-family: inherit; }
 .btn:hover:not(:disabled) { opacity: 0.88; transform: translateY(-1px); box-shadow: 0 3px 10px rgba(0,0,0,0.12); }
 .btn:active:not(:disabled) { transform: translateY(0); }
 .btn:disabled { opacity: 0.45; cursor: not-allowed; }
-.btn-sm  { padding: 5px 12px; font-size: 11px; border-radius: 7px; }
+.btn-sm  {
+  padding: 6px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 8px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+/* Action buttons in tables — outlined style with hover lift */
+td .btn-sm {
+  background: #fff;
+  border: 1.5px solid var(--gray-200);
+  color: var(--gray-600);
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 11px;
+  padding: 5px 11px;
+  margin-right: 2px;
+}
+td .btn-sm:hover:not(:disabled) {
+  background: var(--navy);
+  border-color: var(--navy);
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,33,71,0.25);
+}
+td .btn-sm.btn-primary {
+  background: var(--navy); border-color: var(--navy); color: #fff;
+}
+td .btn-sm.btn-primary:hover:not(:disabled) {
+  background: #001a38; border-color: #001a38;
+}
+td .btn-sm.btn-gold {
+  background: linear-gradient(135deg, #C8922A, #E8B84B);
+  border-color: #C8922A; color: #fff;
+}
+td .btn-sm.btn-gold:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+td .btn-sm.btn-success {
+  background: #fff; border-color: #BBF7D0; color: #16803D;
+}
+td .btn-sm.btn-success:hover:not(:disabled) {
+  background: #16A34A; border-color: #16A34A; color: #fff;
+}
+td .btn-sm.btn-danger {
+  background: #fff; border-color: #FECACA; color: #B91C1C;
+}
+td .btn-sm.btn-danger:hover:not(:disabled) {
+  background: #DC2626; border-color: #DC2626; color: #fff;
+}
 .btn-lg  { padding: 12px 24px; font-size: 15px; }
 .btn-primary { background: var(--navy); color: #fff; box-shadow: 0 2px 8px rgba(0,33,71,0.25); }
 .btn-gold    { background: linear-gradient(135deg,#C8922A,#E8B84B); color: #fff; box-shadow: 0 2px 8px rgba(200,146,42,0.35); }
@@ -554,6 +616,24 @@ td {
   vertical-align: middle;
   font-size: 13px;
   color: var(--gray-700);
+}
+/* Monospace index numbers — pill style */
+td[style*="monospace"], td:has(> div[style*="monospace"]) {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+}
+
+/* Action cell — keep buttons spaced */
+td:last-child {
+  white-space: nowrap;
+}
+td:last-child .btn-sm + .btn-sm {
+  margin-left: 4px;
+}
+
+/* Student name cells — make the name pop */
+td strong, td b {
+  color: var(--navy);
+  font-weight: 700;
 }
 tbody tr { transition: background 0.12s; }
 tbody tr:last-child td { border-bottom: none; }
