@@ -859,7 +859,8 @@ tbody tr:nth-child(even):not(.dup-row):hover { background: #F0F7FF; }
   line-height: 1.2;
 }
 .banner-sub { color: rgba(255,255,255,0.55); font-size: 13px; margin-top: 6px; }
-.banner-icon { font-size: 52px; flex-shrink: 0; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); }
+.banner-icon { flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.banner-icon img { display: block; }
 
 /* ---- Empty state ---- */
 .empty-state { padding: 60px 24px; text-align: center; }
