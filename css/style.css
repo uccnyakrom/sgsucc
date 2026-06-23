@@ -306,36 +306,44 @@ input, select, textarea { font-family: inherit; }
   margin-top: 1px;
 }
 
-/* Change password + logout buttons */
+/* ── Sidebar action buttons (Change Password + Sign Out) ── */
+.sidebar-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}
 .btn-logout {
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.14);
-  color: rgba(255,255,255,0.80);
-  font-size: 15px;
-  padding: 6px 7px;
-  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.88);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  padding: 8px 12px;
+  border-radius: 8px;
   cursor: pointer;
+  text-align: left;
   transition: background 0.2s, color 0.2s, border-color 0.2s;
-  flex-shrink: 0;
+  letter-spacing: 0.2px;
   line-height: 1;
 }
 .btn-logout:hover {
-  background: rgba(255,255,255,0.16);
-  border-color: rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.14);
+  border-color: rgba(255,255,255,0.22);
   color: #ffffff;
 }
-.btn-logout:last-child:hover {
+.btn-logout-signout:hover {
   background: rgba(220,38,38,0.20);
-  border-color: rgba(220,38,38,0.40);
+  border-color: rgba(220,38,38,0.35);
   color: #FCA5A5;
 }
 
-/* Tooltip labels under buttons */
-.sidebar-user .btn-logout[title]::after {
-  display: none;
-}
-
-/* Collapsed state */
+/* Collapsed state — hide labels and action buttons */
 #sidebar.collapsed .user-info,
 #sidebar.collapsed .btn-logout { display: none; }
 
