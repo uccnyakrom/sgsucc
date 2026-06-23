@@ -2,6 +2,17 @@
 //  js/dashboard.js — Dashboard Page
 // ================================================================
 
+
+// Returns current academic year e.g. "2025/2026"
+// Rolls over on 1st August each year automatically
+function getAcademicYear() {
+  const now    = new Date();
+  const year   = now.getFullYear();
+  const month  = now.getMonth() + 1; // 1=Jan … 12=Dec
+  const startY = month >= 8 ? year : year - 1;
+  return `${startY}/${startY + 1}`;
+}
+
 async function renderDashboard() {
   const content = document.getElementById('page-content');
 
@@ -40,7 +51,7 @@ async function renderDashboard() {
     <!-- Banner -->
     <div class="banner" style="margin-bottom:24px">
       <div>
-        <div class="banner-eyebrow">Academic Year 2024/2025</div>
+        <div class="banner-eyebrow">Academic Year ${getAcademicYear()}</div>
         <div class="banner-title">Graduate Clearance Overview</div>
         <div class="banner-sub">Certificate issuance tracking · School of Graduate Studies</div>
       </div>
