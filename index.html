@@ -235,11 +235,16 @@
       position: relative;
       animation: lpFadeIn 0.7s 0.05s ease both;
     }
+    /* Push footer to bottom of right panel */
+    .lp-right > .lp-right-foot {
+      margin-top: auto;
+    }
 
-    /* Top-right meta */
+    /* Top-right meta — absolute so it does not affect form alignment */
     .lp-right-top {
-      display: flex; justify-content: flex-end; align-items: center; gap: 10px;
-      margin-bottom: 36px;
+      position: absolute;
+      top: 28px; right: 32px;
+      display: flex; align-items: center; gap: 10px;
       font-size: 11px; color: #94A3B8; font-weight: 600;
       letter-spacing: 0.3px;
     }
@@ -253,15 +258,13 @@
       50% { opacity: 0.6; }
     }
 
-    /* Form wrap — proper alignment */
+    /* Form wrap — top-aligned to match left panel */
     .lp-form-wrap {
       width: 100%;
       max-width: 400px;
       margin: 0 auto;
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      flex: 1;
     }
 
     .lp-eyebrow {
