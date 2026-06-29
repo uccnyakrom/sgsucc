@@ -52,6 +52,24 @@
       grid-template-columns: 1.1fr 1fr;
       font-family: 'Inter', system-ui, -apple-system, sans-serif;
       background: #002147;
+      position: relative;
+    }
+
+
+    /* Global system status — top-right of whole page */
+    .lp-global-status {
+      position: absolute;
+      top: 20px; right: 24px;
+      display: flex; align-items: center; gap: 8px;
+      font-size: 11px; color: #94A3B8; font-weight: 600;
+      letter-spacing: 0.3px;
+      z-index: 10;
+    }
+    .lp-global-status .dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #16A34A;
+      box-shadow: 0 0 0 3px rgba(22,163,74,0.18);
+      animation: pulse 2s ease-in-out infinite;
     }
 
     /* ════════════════════════════════════════════════════════════════
@@ -455,6 +473,13 @@
      ============================================================ -->
 <div id="login-page">
 
+  <!-- Global system status indicator (top-right of whole page) -->
+  <div class="lp-global-status">
+    <span class="dot"></span>
+    <span>System Online</span>
+  </div>
+
+
   <!-- ════════════════════════════════════════════════════════
        LEFT PANEL — Branding
        ════════════════════════════════════════════════════════ -->
@@ -522,16 +547,8 @@
        ════════════════════════════════════════════════════════ -->
   <div class="lp-right">
 
-    <!-- System status indicator (top right) -->
-    <div class="lp-right-top">
-      <span class="dot"></span>
-      <span>System Online</span>
-    </div>
-
     <!-- Form -->
     <div class="lp-form-wrap">
-
-      <span class="lp-eyebrow">Staff Portal Access</span>
 
       <h2 class="lp-form-heading">Sign in to<br>your account</h2>
 
