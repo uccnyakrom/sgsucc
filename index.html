@@ -54,7 +54,7 @@
 
     /* ── LEFT PANEL ──────────────────────────────────────────── */
     .lp-left {
-      width: 55%;
+      width: 58%;
       flex-shrink: 0;
       position: relative;
       display: flex;
@@ -126,10 +126,10 @@
     /* Main headline */
     .lp-headline {
       font-family: 'Fraunces', Georgia, serif;
-      font-size: 54px;
+      font-size: 42px;
       font-weight: 700;
-      line-height: 1.05;
-      letter-spacing: -1px;
+      line-height: 1.10;
+      letter-spacing: -0.5px;
       color: #ffffff;
       margin-bottom: 20px;
     }
@@ -147,7 +147,7 @@
       color: rgba(255,255,255,0.60);
       line-height: 1.7;
       max-width: 440px;
-      margin-bottom: 52px;
+      margin-bottom: 32px;
       font-weight: 400;
     }
 
@@ -210,8 +210,9 @@
       flex-direction: column;
       padding: 52px 56px 44px;
       background:
-        radial-gradient(ellipse 80% 50% at 100% 0%, rgba(200,146,42,0.06) 0%, transparent 55%),
-        linear-gradient(160deg, #F0F4F8 0%, #E8EDF4 50%, #EDF1F7 100%);
+        radial-gradient(ellipse 70% 45% at 95% 5%, rgba(200,146,42,0.09) 0%, transparent 50%),
+        radial-gradient(ellipse 60% 50% at 5% 95%, rgba(0,33,71,0.06) 0%, transparent 50%),
+        linear-gradient(145deg, #E8EEF6 0%, #DDE5F0 40%, #E2E9F4 100%);
       position: relative;
     }
 
@@ -260,7 +261,7 @@
     /* Heading */
     .lp-form-heading {
       font-family: 'Fraunces', Georgia, serif;
-      font-size: 42px;
+      font-size: 38px;
       font-weight: 700;
       color: #001529;
       line-height: 1.08;
@@ -296,14 +297,14 @@
       width: 100%;
       padding: 14px 16px 14px 42px;
       background: #ffffff;
-      border: 1.5px solid #D1DCE8;
+      border: 1.5px solid #C8D5E8;
       border-radius: 12px;
       font-size: 14px;
       font-family: 'Plus Jakarta Sans', sans-serif;
       color: #1E293B;
       outline: none;
       transition: all 0.2s ease;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      box-shadow: 0 2px 6px rgba(0,33,71,0.08);
     }
     .lp-field input:focus {
       border-color: #C8922A;
@@ -357,14 +358,14 @@
     .lp-notice {
       margin-top: 28px;
       padding: 13px 16px;
-      background: rgba(255,255,255,0.70);
-      border: 1px solid #D1DCE8;
+      background: rgba(255,255,255,0.85);
+      border: 1px solid rgba(0,33,71,0.12);
       border-radius: 12px;
       font-size: 12px;
-      color: #64748B;
+      color: #4A5568;
       text-align: center;
       line-height: 1.55;
-      backdrop-filter: blur(4px);
+      box-shadow: 0 2px 8px rgba(0,33,71,0.06);
     }
 
     /* Right footer */
